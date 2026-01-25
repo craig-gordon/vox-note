@@ -7,9 +7,11 @@ function App() {
     isRecording,
     isTranscribing,
     transcript,
+    hasRecordedAudio,
     startRecording,
     stopRecording,
     clearTranscript,
+    playRecording,
   } = useWhisper()
 
   const handleRecordPress = () => {
@@ -57,6 +59,13 @@ function App() {
           <Text style={styles.recordButtonText}>{getButtonText()}</Text>
         )}
       </Pressable>
+
+      {/* Play Recording Button (for debugging) */}
+      {hasRecordedAudio && !isRecording && (
+        <Pressable style={styles.playButton} onPress={playRecording}>
+          <Text style={styles.playButtonText}>▶ Play Recording</Text>
+        </Pressable>
+      )}
 
       {/* Model Status Indicator */}
       {!modelReady && !isTranscribing && (
@@ -110,6 +119,18 @@ const styles = StyleSheet.create({
   },
   recordButtonDisabled: {
     backgroundColor: '#999',
+  },
+  playButton: {
+    backgroundColor: '#5856D6',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  playButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
   recordButtonText: {
     color: 'white',
