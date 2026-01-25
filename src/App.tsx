@@ -40,6 +40,11 @@ function App() {
     setSelectedEntry(null)
   }
 
+  const handleRecordAgain = () => {
+    clearTranscript()
+    startRecording()
+  }
+
   const handleSelectEntry = (key: string) => {
     const content = loadEntry(key)
     if (content) {
@@ -109,11 +114,14 @@ function App() {
 
           {transcript ? (
             <View style={styles.buttonRow}>
-              <Pressable style={styles.secondaryButton} onPress={clearTranscript}>
+              <Pressable style={styles.secondaryButton} onPress={handleRecordAgain}>
                 <Text style={styles.secondaryButtonText}>Record Again</Text>
               </Pressable>
               <Pressable style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveButtonText}>Save Entry</Text>
+              </Pressable>
+              <Pressable style={styles.deleteButton} onPress={clearTranscript}>
+                <Text style={styles.deleteButtonText}>Delete Entry</Text>
               </Pressable>
             </View>
           ) : null}
@@ -281,6 +289,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    flex: 1,
+    backgroundColor: '#FF3B30',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
