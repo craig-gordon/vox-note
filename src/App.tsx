@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native'
 import { useWhisper } from './hooks/useWhisper'
 import { useEntryStorage } from './hooks/useEntryStorage'
+import { formatEntryKeyReadable } from './utils/formatEntryKey'
 
 function App() {
   const [selectedEntry, setSelectedEntry] = useState<{ key: string; content: string } | null>(null)
@@ -64,99 +65,110 @@ function App() {
 
   const isButtonDisabled = isTranscribing
 
-  if (selectedEntry) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>My Journal</Text>
-        <Pressable style={styles.backButton} onPress={handleBackToList}>
-          <Text style={styles.backButtonText}>← Back to entries</Text>
-        </Pressable>
-        <View style={styles.transcriptContainer}>
-          <Text style={styles.transcriptLabel}>{selectedEntry.key}</Text>
-          <Text style={styles.transcriptText}>{selectedEntry.content}</Text>
-        </View>
-      </View>
-    )
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Journal</Text>
 
-      {/* Recording Button */}
-      <Pressable
-        style={[
-          styles.recordButton,
-          isRecording && styles.recordButtonActive,
-          isButtonDisabled && styles.recordButtonDisabled,
-        ]}
-        onPress={handleRecordPress}
-        disabled={isButtonDisabled}
-      >
-        {isTranscribing ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator color="white" size="small" />
-            <Text style={styles.recordButtonText}>{getButtonText()}</Text>
-          </View>
-        ) : (
-          <Text style={styles.recordButtonText}>{getButtonText()}</Text>
-        )}
-      </Pressable>
-
-      {/* Play Recording Button (for debugging) */}
-      {hasRecordedAudio && !isRecording && (
-        <Pressable style={styles.playButton} onPress={playRecording}>
-          <Text style={styles.playButtonText}>▶ Play Recording</Text>
-        </Pressable>
-      )}
-
-      {/* Model Status Indicator */}
-      {!modelReady && !isTranscribing && (
-        <Text style={styles.statusText}>Loading speech recognition model...</Text>
-      )}
-
-      {/* Transcript Display */}
-      {transcript && (
-        <View style={styles.transcriptContainer}>
-          <Text style={styles.transcriptLabel}>Your Entry:</Text>
-          <Text style={styles.transcriptText}>{transcript}</Text>
-        </View>
-      )}
-
-      {/* Save Button */}
-      {transcript && (
-        <View style={styles.buttonRow}>
-          <Pressable style={styles.secondaryButton} onPress={clearTranscript}>
-            <Text style={styles.secondaryButtonText}>Record Again</Text>
+      <View style={styles.columns}>
+        {/* Left Column - Recording */}
+        <View style={styles.leftColumn}>
+          {/* Recording Button */}
+          <Pressable
+            style={[
+              styles.recordButton,
+              isRecording && styles.recordButtonActive,
+              isButtonDisabled && styles.recordButtonDisabled,
+            ]}
+            onPress={handleRecordPress}
+            disabled={isButtonDisabled}
+          >
+            {isTranscribing ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator color="white" size="small" />
+                <Text style={styles.recordButtonText}>{getButtonText()}</Text>
+              </View>
+            ) : (
+              <Text style={styles.recordButtonText}>{getButtonText()}</Text>
+            )}
           </Pressable>
-          <Pressable style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save Entry</Text>
-          </Pressable>
-        </View>
-      )}
 
-      {/* Saved Entries List */}
-      {entryKeys.length > 0 && (
-        <View style={styles.entriesSection}>
+          {/* Play Recording Button (for debugging) */}
+          {hasRecordedAudio && !isRecording && (
+            <Pressable style={styles.playButton} onPress={playRecording}>
+              <Text style={styles.playButtonText}>▶ Play Recording</Text>
+            </Pressable>
+          )}
+
+          {/* Model Status Indicator */}
+          {!modelReady && !isTranscribing && (
+            <Text style={styles.statusText}>Loading speech recognition model...</Text>
+          )}
+
+          {/* Transcript Display */}
+          {transcript && (
+            <View style={styles.transcriptContainer}>
+              <Text style={styles.transcriptLabel}>Your Entry:</Text>
+              <Text style={styles.transcriptText}>{transcript}</Text>
+            </View>
+          )}
+
+          {/* Save Button */}
+          {transcript && (
+            <View style={styles.buttonRow}>
+              <Pressable style={styles.secondaryButton} onPress={clearTranscript}>
+                <Text style={styles.secondaryButtonText}>Record Again</Text>
+              </Pressable>
+              <Pressable style={styles.saveButton} onPress={handleSave}>
+                <Text style={styles.saveButtonText}>Save Entry</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+
+        {/* Right Column - Saved Entries */}
+        <View style={styles.rightColumn}>
           <View style={styles.entriesHeader}>
             <Text style={styles.entriesSectionTitle}>Saved Entries</Text>
-            <Pressable onPress={handleClearAllEntries}>
-              <Text style={styles.clearAllText}>Clear All</Text>
-            </Pressable>
-          </View>
-          <ScrollView style={styles.entriesList}>
-            {entryKeys.map((key) => (
-              <Pressable
-                key={key}
-                style={styles.entryItem}
-                onPress={() => handleSelectEntry(key)}
-              >
-                <Text style={styles.entryItemText}>{key}</Text>
+            {entryKeys.length > 0 && (
+              <Pressable onPress={handleClearAllEntries}>
+                <Text style={styles.clearAllText}>Clear All</Text>
               </Pressable>
-            ))}
-          </ScrollView>
+            )}
+          </View>
+
+          {entryKeys.length === 0 ? (
+            <Text style={styles.emptyText}>No entries yet</Text>
+          ) : (
+            <ScrollView style={styles.entriesList}>
+              {entryKeys.map((key) => (
+                <Pressable
+                  key={key}
+                  style={[
+                    styles.entryItem,
+                    selectedEntry?.key === key && styles.entryItemSelected,
+                  ]}
+                  onPress={() => handleSelectEntry(key)}
+                >
+                  <Text style={styles.entryItemText}>{formatEntryKeyReadable(key)}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
+
+          {/* Selected Entry Display */}
+          {selectedEntry && (
+            <View style={styles.selectedEntryContainer}>
+              <View style={styles.selectedEntryHeader}>
+                <Text style={styles.selectedEntryLabel}>{formatEntryKeyReadable(selectedEntry.key)}</Text>
+                <Pressable onPress={handleBackToList}>
+                  <Text style={styles.closeText}>Close</Text>
+                </Pressable>
+              </View>
+              <Text style={styles.selectedEntryText}>{selectedEntry.content}</Text>
+            </View>
+          )}
         </View>
-      )}
+      </View>
     </View>
   )
 }
@@ -166,12 +178,27 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
+    minHeight: '100vh' as unknown as number,
+    width: '100%',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 24,
     color: '#333',
+    textAlign: 'center',
+  },
+  columns: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 24,
+  },
+  leftColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  rightColumn: {
+    flex: 1,
   },
   recordButton: {
     backgroundColor: '#007AFF',
@@ -179,6 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     marginBottom: 12,
+    minWidth: 200,
   },
   recordButtonActive: {
     backgroundColor: '#FF3B30',
@@ -222,6 +250,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     minHeight: 150,
+    width: '100%',
   },
   transcriptLabel: {
     fontSize: 14,
@@ -238,6 +267,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     marginTop: 20,
+    width: '100%',
   },
   secondaryButton: {
     flex: 1,
@@ -262,10 +292,6 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
-  },
-  entriesSection: {
-    marginTop: 30,
-    flex: 1,
   },
   entriesHeader: {
     flexDirection: 'row',
@@ -297,12 +323,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007AFF',
   },
-  backButton: {
-    marginBottom: 16,
+  entryItemSelected: {
+    borderColor: '#007AFF',
+    borderWidth: 2,
   },
-  backButtonText: {
-    fontSize: 16,
+  emptyText: {
+    color: '#999',
+    fontSize: 14,
+  },
+  selectedEntryContainer: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    flex: 1,
+  },
+  selectedEntryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  selectedEntryLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  closeText: {
+    fontSize: 14,
     color: '#007AFF',
+  },
+  selectedEntryText: {
+    fontSize: 16,
+    color: '#333',
+    lineHeight: 24,
   },
 })
 
