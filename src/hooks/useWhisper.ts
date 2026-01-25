@@ -74,14 +74,15 @@ export function useWhisper(): UseWhisperReturn {
 
     async function loadModel() {
       try {
-        console.log('Loading Whisper model...')
+        console.log('Loading Whisper model (WebGPU)...')
         const transcriber = await pipeline(
           'automatic-speech-recognition',
           'Xenova/whisper-small.en',
+          { device: 'webgpu' }
         )
 
         if (!cancelled) {
-          console.log('Whisper model loaded successfully')
+          console.log('Whisper model loaded successfully (WebGPU)')
           pipelineRef.current = transcriber
           setModelReady(true)
 
@@ -91,7 +92,27 @@ export function useWhisper(): UseWhisperReturn {
           }
         }
       } catch (error) {
-        console.error('Failed to load Whisper model:', error)
+        console.error('Failed to load Whisper model with WebGPU:', error)
+        // Fallback to CPU if WebGPU fails
+        console.log('Retrying Whisper with CPU...')
+        try {
+          const transcriber = await pipeline(
+            'automatic-speech-recognition',
+            'Xenova/whisper-small.en',
+          )
+          if (!cancelled) {
+            console.log('Whisper model loaded successfully (CPU fallback)')
+            pipelineRef.current = transcriber
+            setModelReady(true)
+
+            if (pendingStartRef.current) {
+              pendingStartRef.current = false
+              startRecordingInternal()
+            }
+          }
+        } catch (fallbackError) {
+          console.error('Failed to load Whisper model (CPU fallback):', fallbackError)
+        }
       }
     }
 

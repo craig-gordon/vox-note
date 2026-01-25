@@ -17,7 +17,6 @@ This project uses Vite + React Native for Web + TypeScript + SWC. I am developin
 
 ## Next Up
 
-- Get voice transcription working
 - LocalStorage persistence for journal entries
 - Basic list view of entries
 
