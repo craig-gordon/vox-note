@@ -1,0 +1,220 @@
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { pipeline, AutomaticSpeechRecognitionPipeline } from '@huggingface/transformers'
+
+type RecordingState = 'idle' | 'recording' | 'transcribing'
+
+interface UseWhisperReturn {
+  modelReady: boolean
+  isRecording: boolean
+  isTranscribing: boolean
+  transcript: string
+  recordingState: RecordingState
+  startRecording: () => Promise<void>
+  stopRecording: () => void
+  clearTranscript: () => void
+}
+
+const SAMPLE_RATE = 16000
+
+export function useWhisper(): UseWhisperReturn {
+  const [modelReady, setModelReady] = useState(false)
+  const [recordingState, setRecordingState] = useState<RecordingState>('idle')
+  const [transcript, setTranscript] = useState('')
+
+  const pipelineRef = useRef<AutomaticSpeechRecognitionPipeline | null>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null)
+  const audioChunksRef = useRef<Float32Array[]>([])
+  const pendingStartRef = useRef(false)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  // Load model eagerly on mount
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadModel() {
+      try {
+        console.log('Loading Whisper model...')
+        const transcriber = await pipeline(
+          'automatic-speech-recognition',
+          'Xenova/whisper-tiny.en',
+        )
+
+        if (!cancelled) {
+          console.log('Whisper model loaded successfully')
+          pipelineRef.current = transcriber
+          setModelReady(true)
+
+          if (pendingStartRef.current) {
+            pendingStartRef.current = false
+            startRecordingInternal()
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load Whisper model:', error)
+      }
+    }
+
+    loadModel()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const startRecordingInternal = useCallback(async () => {
+    try {
+      // Get microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          channelCount: 1,
+          sampleRate: SAMPLE_RATE,
+        }
+      })
+      streamRef.current = stream
+      audioChunksRef.current = []
+
+      // Create audio context at 16kHz for Whisper
+      const audioContext = new AudioContext({ sampleRate: SAMPLE_RATE })
+      audioContextRef.current = audioContext
+
+      // Create source from microphone
+      const source = audioContext.createMediaStreamSource(stream)
+
+      // Use ScriptProcessorNode to capture raw audio samples
+      // (AudioWorklet would be better but requires more setup)
+      const bufferSize = 4096
+      const processor = audioContext.createScriptProcessor(bufferSize, 1, 1)
+
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0)
+        // Copy the data since the buffer gets reused
+        const chunk = new Float32Array(inputData.length)
+        chunk.set(inputData)
+        audioChunksRef.current.push(chunk)
+      }
+
+      source.connect(processor)
+      processor.connect(audioContext.destination)
+
+      // Store processor reference for cleanup
+      workletNodeRef.current = processor as unknown as AudioWorkletNode
+
+      setRecordingState('recording')
+      console.log('Recording started at', audioContext.sampleRate, 'Hz')
+    } catch (error) {
+      console.error('Failed to start recording:', error)
+      setRecordingState('idle')
+      pendingStartRef.current = false
+    }
+  }, [])
+
+  const stopRecording = useCallback(async () => {
+    if (pendingStartRef.current) {
+      pendingStartRef.current = false
+      setRecordingState('idle')
+      return
+    }
+
+    if (recordingState !== 'recording') return
+
+    setRecordingState('transcribing')
+
+    // Stop audio processing
+    if (workletNodeRef.current) {
+      workletNodeRef.current.disconnect()
+      workletNodeRef.current = null
+    }
+
+    if (audioContextRef.current) {
+      await audioContextRef.current.close()
+      audioContextRef.current = null
+    }
+
+    // Stop microphone
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
+    }
+
+    // Combine all audio chunks into single Float32Array
+    const totalLength = audioChunksRef.current.reduce((acc, chunk) => acc + chunk.length, 0)
+    const audioData = new Float32Array(totalLength)
+    let offset = 0
+    for (const chunk of audioChunksRef.current) {
+      audioData.set(chunk, offset)
+      offset += chunk.length
+    }
+
+    console.log('Audio recorded:', totalLength, 'samples,', (totalLength / SAMPLE_RATE).toFixed(1), 'seconds')
+
+    // Check if we actually have audio
+    if (totalLength === 0) {
+      console.error('No audio data recorded')
+      setTranscript('[No audio recorded]')
+      setRecordingState('idle')
+      return
+    }
+
+    // Check audio levels
+    let maxAmp = 0
+    for (let i = 0; i < audioData.length; i++) {
+      maxAmp = Math.max(maxAmp, Math.abs(audioData[i]))
+    }
+    console.log('Max amplitude:', maxAmp)
+
+    if (maxAmp < 0.01) {
+      console.warn('Audio is very quiet, may not transcribe well')
+    }
+
+    try {
+      if (pipelineRef.current) {
+        console.log('Starting transcription...')
+        const startTime = Date.now()
+
+        const result = await pipelineRef.current(audioData, {
+          language: 'english',
+          task: 'transcribe',
+        })
+
+        console.log('Transcription completed in', ((Date.now() - startTime) / 1000).toFixed(1), 'seconds')
+        console.log('Result:', result)
+
+        const text = Array.isArray(result) ? result[0]?.text : result.text
+        setTranscript(text?.trim() || '')
+      }
+    } catch (error) {
+      console.error('Transcription error:', error)
+      setTranscript('[Transcription failed]')
+    }
+
+    setRecordingState('idle')
+  }, [recordingState])
+
+  const startRecording = useCallback(async () => {
+    if (recordingState !== 'idle') return
+
+    if (!modelReady) {
+      pendingStartRef.current = true
+      setRecordingState('transcribing')
+      return
+    }
+
+    await startRecordingInternal()
+  }, [modelReady, recordingState, startRecordingInternal])
+
+  const clearTranscript = useCallback(() => {
+    setTranscript('')
+  }, [])
+
+  return {
+    modelReady,
+    isRecording: recordingState === 'recording',
+    isTranscribing: recordingState === 'transcribing',
+    transcript,
+    recordingState,
+    startRecording,
+    stopRecording,
+    clearTranscript,
+  }
+}
