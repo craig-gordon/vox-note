@@ -72,13 +72,33 @@ export function useWhisper(): UseWhisperReturn {
   useEffect(() => {
     let cancelled = false
 
+    // Suppress known warnings during model loading
+    const originalWarn = console.warn
+    const originalError = console.error
+    const suppressedPatterns = [
+      'powerPreference',
+      'VerifyEachNodeIsAssignedToAnEp',
+      'Some nodes were not assigned',
+    ]
+    const shouldSuppress = (msg: unknown) =>
+      typeof msg === 'string' && suppressedPatterns.some((p) => msg.includes(p))
+
+    console.warn = (...args: unknown[]) => {
+      if (shouldSuppress(args[0])) return
+      originalWarn.apply(console, args)
+    }
+    console.error = (...args: unknown[]) => {
+      if (shouldSuppress(args[0])) return
+      originalError.apply(console, args)
+    }
+
     async function loadModel() {
       try {
         console.log('Loading Whisper model (WebGPU)...')
         const transcriber = await pipeline(
           'automatic-speech-recognition',
           'Xenova/whisper-small.en',
-          { device: 'webgpu' }
+          { device: 'webgpu', dtype: 'fp32' }
         )
 
         if (!cancelled) {
@@ -120,6 +140,8 @@ export function useWhisper(): UseWhisperReturn {
 
     return () => {
       cancelled = true
+      console.warn = originalWarn
+      console.error = originalError
     }
   }, [])
 

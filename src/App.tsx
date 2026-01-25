@@ -58,8 +58,8 @@ function App() {
 
   const getButtonText = () => {
     if (isRecording) return 'Stop Recording'
-    if (isTranscribing && !modelReady) return 'Getting things ready...'
-    if (isTranscribing) return 'Transcribing...'
+    if (isTranscribing && !modelReady) return 'Getting things ready'
+    if (isTranscribing) return 'Transcribing'
     return 'Start Recording'
   }
 
@@ -70,9 +70,7 @@ function App() {
       <Text style={styles.title}>My Journal</Text>
 
       <View style={styles.columns}>
-        {/* Left Column - Recording */}
         <View style={styles.leftColumn}>
-          {/* Recording Button */}
           <Pressable
             style={[
               styles.recordButton,
@@ -92,28 +90,24 @@ function App() {
             )}
           </Pressable>
 
-          {/* Play Recording Button (for debugging) */}
-          {hasRecordedAudio && !isRecording && (
+          {hasRecordedAudio && !isRecording ? (
             <Pressable style={styles.playButton} onPress={playRecording}>
               <Text style={styles.playButtonText}>▶ Play Recording</Text>
             </Pressable>
-          )}
+          ) : null}
 
-          {/* Model Status Indicator */}
-          {!modelReady && !isTranscribing && (
-            <Text style={styles.statusText}>Loading speech recognition model...</Text>
-          )}
+          {!modelReady && !isTranscribing ? (
+            <Text style={styles.statusText}>Loading speech recognition model</Text>
+          ) : null}
 
-          {/* Transcript Display */}
-          {transcript && (
+          {transcript ? (
             <View style={styles.transcriptContainer}>
               <Text style={styles.transcriptLabel}>Your Entry:</Text>
               <Text style={styles.transcriptText}>{transcript}</Text>
             </View>
-          )}
+          ) : null}
 
-          {/* Save Button */}
-          {transcript && (
+          {transcript ? (
             <View style={styles.buttonRow}>
               <Pressable style={styles.secondaryButton} onPress={clearTranscript}>
                 <Text style={styles.secondaryButtonText}>Record Again</Text>
@@ -122,18 +116,17 @@ function App() {
                 <Text style={styles.saveButtonText}>Save Entry</Text>
               </Pressable>
             </View>
-          )}
+          ) : null}
         </View>
 
-        {/* Right Column - Saved Entries */}
         <View style={styles.rightColumn}>
           <View style={styles.entriesHeader}>
             <Text style={styles.entriesSectionTitle}>Saved Entries</Text>
-            {entryKeys.length > 0 && (
+            {entryKeys.length > 0 ? (
               <Pressable onPress={handleClearAllEntries}>
                 <Text style={styles.clearAllText}>Clear All</Text>
               </Pressable>
-            )}
+            ) : null}
           </View>
 
           {entryKeys.length === 0 ? (
@@ -155,8 +148,7 @@ function App() {
             </ScrollView>
           )}
 
-          {/* Selected Entry Display */}
-          {selectedEntry && (
+          {selectedEntry ? (
             <View style={styles.selectedEntryContainer}>
               <View style={styles.selectedEntryHeader}>
                 <Text style={styles.selectedEntryLabel}>{formatEntryKeyReadable(selectedEntry.key)}</Text>
@@ -166,7 +158,7 @@ function App() {
               </View>
               <Text style={styles.selectedEntryText}>{selectedEntry.content}</Text>
             </View>
-          )}
+          ) : null}
         </View>
       </View>
     </View>
