@@ -1,36 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native'
 import { useWhisper } from './hooks/useWhisper'
-
-const STORAGE_PREFIX = 'journal_'
-
-function formatEntryKey(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const year = String(date.getFullYear()).slice(-2)
-  let hours = date.getHours()
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-  hours = hours % 12
-  hours = hours ? hours : 12
-  const hoursStr = String(hours).padStart(2, '0')
-  return `${month}-${day}-${year}_${hoursStr}:${minutes}:${seconds}${ampm}`
-}
-
-function loadAllEntryKeys(): string[] {
-  const keys: string[] = []
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    if (key?.startsWith(STORAGE_PREFIX)) {
-      keys.push(key.replace(STORAGE_PREFIX, ''))
-    }
-  }
-  return keys.sort().reverse()
-}
+import { useEntryStorage } from './hooks/useEntryStorage'
 
 function App() {
-  const [entryKeys, setEntryKeys] = useState<string[]>([])
   const [selectedEntry, setSelectedEntry] = useState<{ key: string; content: string } | null>(null)
 
   const {
@@ -45,9 +18,12 @@ function App() {
     playRecording,
   } = useWhisper()
 
-  useEffect(() => {
-    setEntryKeys(loadAllEntryKeys())
-  }, [])
+  const {
+    entryKeys,
+    saveEntry,
+    loadEntry,
+    deleteAllEntries,
+  } = useEntryStorage()
 
   const handleRecordPress = () => {
     if (isRecording) {
@@ -58,15 +34,13 @@ function App() {
   }
 
   const handleSave = () => {
-    const key = formatEntryKey(new Date())
-    localStorage.setItem(STORAGE_PREFIX + key, transcript)
-    setEntryKeys(loadAllEntryKeys())
+    saveEntry(transcript)
     clearTranscript()
     setSelectedEntry(null)
   }
 
   const handleSelectEntry = (key: string) => {
-    const content = localStorage.getItem(STORAGE_PREFIX + key)
+    const content = loadEntry(key)
     if (content) {
       setSelectedEntry({ key, content })
     }
@@ -77,15 +51,7 @@ function App() {
   }
 
   const handleClearAllEntries = () => {
-    const keysToDelete: string[] = []
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i)
-      if (key?.startsWith(STORAGE_PREFIX)) {
-        keysToDelete.push(key)
-      }
-    }
-    keysToDelete.forEach((key) => localStorage.removeItem(key))
-    setEntryKeys([])
+    deleteAllEntries()
     setSelectedEntry(null)
   }
 

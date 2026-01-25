@@ -20,11 +20,16 @@ This project uses Vite + React Native for Web + TypeScript + SWC. I am developin
 - LocalStorage persistence for journal entries
 - Basic list view of entries
 
-# Technical Decisions
+## Technical Decisions
 
 - Use React Native primitives (View, Text, TextInput, etc.) instead of HTML elements for future mobile compatibility
 - Store data in localStorage for now; will migrate to a backend later
 - No authentication until multi-user support is needed
+
+## Code Guidelines
+
+- Create React custom hooks liberally. Keep the main components lean. Abstract shared functionality to custom hooks. Move complex React functionality to custom hooks as well.
+- Add other generalized logic that doesn't have to do with React functionality to util functions.
 
 ## Avoid
 
