@@ -1,29 +1,36 @@
 {
   "name": "journaling-app",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "workspaces": [
-    "shared",
-    "web",
-    "mobile"
-  ],
+  "workspaces": {
+    "packages": ["shared", "web", "mobile"],
+    "nohoist": [
+      "**/expo",
+      "**/expo/**",
+      "**/react-native",
+      "**/react-native/**",
+      "**/metro",
+      "**/metro/**",
+      "**/@expo/**",
+      "**/@react-native/**"
+    ]
+  },
   "scripts": {
-    "web:dev": "npm run dev --workspace=@journaling-app/web",
-    "web:build": "npm run build --workspace=@journaling-app/web",
-    "mobile:start": "cd mobile && npx expo start",
-    "mobile:ios": "npm run ios --workspace=@journaling-app/mobile",
-    "mobile:android": "npm run android --workspace=@journaling-app/mobile"
+    "web:dev": "yarn workspace @journaling-app/web dev",
+    "web:build": "yarn workspace @journaling-app/web build",
+    "mobile:start": "yarn workspace @journaling-app/mobile start",
+    "mobile:ios": "yarn workspace @journaling-app/mobile ios",
+    "mobile:android": "yarn workspace @journaling-app/mobile android"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
     "react": "^19.2.0"
   },
-  "overrides": {
-    "react-native": "0.76.9"
-  },
   "devDependencies": {
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.0",
     "typescript": "~5.9.3"
+  },
+  "resolutions": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   }
 }

@@ -10,12 +10,13 @@
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
     "@journaling-app/shared": "*",
-    "@types/react-native-web": "^0.19.2",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-native-web": "^0.19.12"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@types/react-dom": "^19.2.3",
+    "@types/react-dom": "^19.2.0",
+    "@types/react-native-web": "^0.19.2",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "vite": "^7.2.4"
   }
