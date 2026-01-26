@@ -1,0 +1,25 @@
+{
+  "name": "@journaling-app/mobile",
+  "version": "0.0.0",
+  "main": "App.tsx",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo run:ios",
+    "android": "expo run:android"
+  },
+  "dependencies": {
+    "@journaling-app/shared": "*",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "expo": "~52.0.0",
+    "expo-asset": "~11.0.5",
+    "expo-constants": "~17.0.8",
+    "expo-file-system": "~18.0.12",
+    "expo-speech-recognition": "^3.0.1",
+    "expo-status-bar": "~2.0.0",
+    "react-native": "0.76.9"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "babel-plugin-module-resolver": "^5.0.0"
+  }
+}

@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native'
-import { useWhisper } from './hooks/useWhisper'
-import { useEntryStorage } from './hooks/useEntryStorage'
-import { formatEntryKeyReadable } from './utils/formatEntryKey'
+import { useState, useCallback } from 'react'
+import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView, Platform } from 'react-native'
+import { useSpeechToText } from '../hooks/useSpeechToText'
+import { useEntryStorage } from '../hooks/useEntryStorage'
+import { formatEntryKeyReadable } from '../utils/formatEntryKey'
 
-function App() {
+export function JournalApp() {
   const [selectedEntry, setSelectedEntry] = useState<{ key: string; content: string } | null>(null)
 
   const {
@@ -17,7 +17,7 @@ function App() {
     stopRecording,
     clearTranscript,
     playRecording,
-  } = useWhisper()
+  } = useSpeechToText()
 
   const {
     entryKeys,
@@ -34,8 +34,8 @@ function App() {
     }
   }
 
-  const handleSave = () => {
-    saveEntry(transcript)
+  const handleSave = async () => {
+    await saveEntry(transcript)
     clearTranscript()
     setSelectedEntry(null)
   }
@@ -45,19 +45,19 @@ function App() {
     startRecording()
   }
 
-  const handleSelectEntry = (key: string) => {
-    const content = loadEntry(key)
+  const handleSelectEntry = useCallback(async (key: string) => {
+    const content = await loadEntry(key)
     if (content) {
       setSelectedEntry({ key, content })
     }
-  }
+  }, [loadEntry])
 
   const handleBackToList = () => {
     setSelectedEntry(null)
   }
 
-  const handleClearAllEntries = () => {
-    deleteAllEntries()
+  const handleClearAllEntries = async () => {
+    await deleteAllEntries()
     setSelectedEntry(null)
   }
 
@@ -70,12 +70,14 @@ function App() {
 
   const isButtonDisabled = isTranscribing
 
+  const isWeb = Platform.OS === 'web'
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>My Journal</Text>
 
-      <View style={styles.columns}>
-        <View style={styles.leftColumn}>
+      <View style={[styles.columns, !isWeb && styles.columnsMobile]}>
+        <View style={[styles.leftColumn, !isWeb && styles.leftColumnMobile]}>
           <Pressable
             style={[
               styles.recordButton,
@@ -95,14 +97,16 @@ function App() {
             )}
           </Pressable>
 
-          {hasRecordedAudio && !isRecording ? (
+          {hasRecordedAudio && !isRecording && isWeb ? (
             <Pressable style={styles.playButton} onPress={playRecording}>
-              <Text style={styles.playButtonText}>▶ Play Recording</Text>
+              <Text style={styles.playButtonText}>Play Recording</Text>
             </Pressable>
           ) : null}
 
           {!modelReady && !isTranscribing ? (
-            <Text style={styles.statusText}>Loading speech recognition model</Text>
+            <Text style={styles.statusText}>
+              {isWeb ? 'Loading speech recognition model' : 'Requesting microphone permission'}
+            </Text>
           ) : null}
 
           {transcript ? (
@@ -113,7 +117,7 @@ function App() {
           ) : null}
 
           {transcript ? (
-            <View style={styles.buttonRow}>
+            <View style={[styles.buttonRow, !isWeb && styles.buttonRowMobile]}>
               <Pressable style={styles.secondaryButton} onPress={handleRecordAgain}>
                 <Text style={styles.secondaryButtonText}>Record Again</Text>
               </Pressable>
@@ -127,7 +131,7 @@ function App() {
           ) : null}
         </View>
 
-        <View style={styles.rightColumn}>
+        <View style={[styles.rightColumn, !isWeb && styles.rightColumnMobile]}>
           <View style={styles.entriesHeader}>
             <Text style={styles.entriesSectionTitle}>Saved Entries</Text>
             {entryKeys.length > 0 ? (
@@ -178,7 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#f5f5f5',
-    minHeight: '100vh' as unknown as number,
+    ...(Platform.OS === 'web' ? { minHeight: '100vh' as unknown as number } : {}),
     width: '100%',
   },
   title: {
@@ -193,12 +197,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 24,
   },
+  columnsMobile: {
+    flexDirection: 'column',
+  },
   leftColumn: {
     flex: 1,
     alignItems: 'center',
   },
+  leftColumnMobile: {
+    marginBottom: 24,
+  },
   rightColumn: {
     flex: 1,
+  },
+  rightColumnMobile: {
+    flex: 2,
   },
   recordButton: {
     backgroundColor: '#007AFF',
@@ -268,6 +281,9 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 20,
     width: '100%',
+  },
+  buttonRowMobile: {
+    flexDirection: 'column',
   },
   secondaryButton: {
     flex: 1,
@@ -374,4 +390,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default App
+export default JournalApp

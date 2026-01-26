@@ -1,0 +1,14 @@
+export type RecordingState = 'idle' | 'recording' | 'transcribing'
+
+export interface UseSpeechToTextReturn {
+  modelReady: boolean
+  isRecording: boolean
+  isTranscribing: boolean
+  transcript: string
+  recordingState: RecordingState
+  hasRecordedAudio: boolean
+  startRecording: () => Promise<void>
+  stopRecording: () => void
+  clearTranscript: () => void
+  playRecording: () => void
+}

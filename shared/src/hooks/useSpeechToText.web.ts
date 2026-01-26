@@ -1,21 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { pipeline, AutomaticSpeechRecognitionPipeline } from '@huggingface/transformers'
 import { suppressKnownWarnings } from '../utils/suppressLogs'
-
-type RecordingState = 'idle' | 'recording' | 'transcribing'
-
-interface UseWhisperReturn {
-  modelReady: boolean
-  isRecording: boolean
-  isTranscribing: boolean
-  transcript: string
-  recordingState: RecordingState
-  hasRecordedAudio: boolean
-  startRecording: () => Promise<void>
-  stopRecording: () => void
-  clearTranscript: () => void
-  playRecording: () => void
-}
+import type { RecordingState, UseSpeechToTextReturn } from './useSpeechToText.types'
 
 const SAMPLE_RATE = 16000
 
@@ -55,7 +41,7 @@ function float32ToWav(samples: Float32Array, sampleRate: number): Blob {
   return new Blob([buffer], { type: 'audio/wav' })
 }
 
-export function useWhisper(): UseWhisperReturn {
+export function useSpeechToText(): UseSpeechToTextReturn {
   const [modelReady, setModelReady] = useState(false)
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [transcript, setTranscript] = useState('')

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { formatEntryKey } from '../utils/formatEntryKey'
-
-const STORAGE_PREFIX = 'journal_'
+import type { UseEntryStorageReturn } from './useEntryStorage.types'
+import { STORAGE_PREFIX } from './useEntryStorage.types'
 
 function loadAllEntryKeys(): string[] {
   const keys: string[] = []
@@ -14,30 +14,32 @@ function loadAllEntryKeys(): string[] {
   return keys.sort().reverse()
 }
 
-export function useEntryStorage() {
+export function useEntryStorage(): UseEntryStorageReturn {
   const [entryKeys, setEntryKeys] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     setEntryKeys(loadAllEntryKeys())
+    setIsLoading(false)
   }, [])
 
-  const saveEntry = useCallback((content: string): string => {
+  const saveEntry = useCallback(async (content: string): Promise<string> => {
     const key = formatEntryKey(new Date())
     localStorage.setItem(STORAGE_PREFIX + key, content)
     setEntryKeys(loadAllEntryKeys())
     return key
   }, [])
 
-  const loadEntry = useCallback((key: string): string | null => {
+  const loadEntry = useCallback(async (key: string): Promise<string | null> => {
     return localStorage.getItem(STORAGE_PREFIX + key)
   }, [])
 
-  const deleteEntry = useCallback((key: string): void => {
+  const deleteEntry = useCallback(async (key: string): Promise<void> => {
     localStorage.removeItem(STORAGE_PREFIX + key)
     setEntryKeys(loadAllEntryKeys())
   }, [])
 
-  const deleteAllEntries = useCallback((): void => {
+  const deleteAllEntries = useCallback(async (): Promise<void> => {
     const keysToDelete: string[] = []
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
@@ -51,6 +53,7 @@ export function useEntryStorage() {
 
   return {
     entryKeys,
+    isLoading,
     saveEntry,
     loadEntry,
     deleteEntry,

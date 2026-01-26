@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@journaling-app/shared": [
+        "../shared/src"
+      ],
+      "@journaling-app/shared/*": [
+        "../shared/src/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../shared/src/**/*.ts",
+    "../shared/src/**/*.tsx"
+  ],
+  "extends": "expo/tsconfig.base"
+}

@@ -6,7 +6,19 @@
       "Bash(npm run dev:*)",
       "mcp__ide__getDiagnostics",
       "Bash(git checkout:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm view:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(curl:*)",
+      "Bash(npm ls:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm run mobile:start:*)",
+      "Bash(npx expo start)",
+      "Bash(taskkill:*)",
+      "Bash(node -e:*)",
+      "Bash(yarn:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

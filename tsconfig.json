@@ -1,13 +1,10 @@
 {
-  "files": [],
   "compilerOptions": {
-    "types": ["vite/client", "react-native"],
-  },
-  "paths": {
-    "react-native": ["./node_modules/react-native-web"]
-  },
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx"
+  }
 }

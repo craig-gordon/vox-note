@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
@@ -22,7 +22,13 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+
+    /* React Native Web alias */
+    "paths": {
+      "react-native": ["../node_modules/react-native-web"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "../shared/src"],
+  "exclude": ["../shared/src/**/*.native.ts", "../shared/src/**/*.native.tsx"]
 }

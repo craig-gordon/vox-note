@@ -30,6 +30,7 @@ This project uses Vite + React Native for Web + TypeScript + SWC. I am developin
 
 - Create React custom hooks liberally. Keep the main components lean. Abstract shared functionality to custom hooks. Move complex React functionality to custom hooks as well.
 - Add other generalized logic that doesn't have to do with React functionality to util functions.
+- Reuse as much code as possible between the Web and Mobile components.
 
 ## Avoid
 

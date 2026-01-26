@@ -1,0 +1,10 @@
+export interface UseEntryStorageReturn {
+  entryKeys: string[]
+  isLoading: boolean
+  saveEntry: (content: string) => Promise<string>
+  loadEntry: (key: string) => Promise<string | null>
+  deleteEntry: (key: string) => Promise<void>
+  deleteAllEntries: () => Promise<void>
+}
+
+export const STORAGE_PREFIX = 'journal_'
