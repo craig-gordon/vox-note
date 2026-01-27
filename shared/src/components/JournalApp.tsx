@@ -110,13 +110,13 @@ export function JournalApp() {
 
           {transcript ? (
             <View style={[styles.buttonRow, !isWeb && styles.buttonRowMobile]}>
-              <Pressable style={styles.secondaryButton} onPress={handleRecordAgain}>
+              <Pressable style={[styles.secondaryButton, !isWeb && styles.buttonMobile]} onPress={handleRecordAgain}>
                 <Text style={styles.secondaryButtonText}>Record Again</Text>
               </Pressable>
-              <Pressable style={styles.saveButton} onPress={handleSave}>
+              <Pressable style={[styles.saveButton, !isWeb && styles.buttonMobile]} onPress={handleSave}>
                 <Text style={styles.saveButtonText}>Save Entry</Text>
               </Pressable>
-              <Pressable style={styles.deleteButton} onPress={clearTranscript}>
+              <Pressable style={[styles.deleteButton, !isWeb && styles.buttonMobile]} onPress={clearTranscript}>
                 <Text style={styles.deleteButtonText}>Delete Entry</Text>
               </Pressable>
             </View>
@@ -197,6 +197,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   leftColumnMobile: {
+    flex: 0,
     marginBottom: 24,
   },
   rightColumn: {
@@ -276,6 +277,9 @@ const styles = StyleSheet.create({
   },
   buttonRowMobile: {
     flexDirection: 'column',
+  },
+  buttonMobile: {
+    flex: 0,
   },
   secondaryButton: {
     flex: 1,
