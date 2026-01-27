@@ -1,7 +1,6 @@
 export type RecordingState = 'idle' | 'recording' | 'transcribing'
 
 export interface UseSpeechToTextReturn {
-  modelReady: boolean
   isRecording: boolean
   isTranscribing: boolean
   transcript: string

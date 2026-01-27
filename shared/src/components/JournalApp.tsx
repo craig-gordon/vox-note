@@ -8,7 +8,6 @@ export function JournalApp() {
   const [selectedEntry, setSelectedEntry] = useState<{ key: string; content: string } | null>(null)
 
   const {
-    modelReady,
     isRecording,
     isTranscribing,
     transcript,
@@ -63,7 +62,6 @@ export function JournalApp() {
 
   const getButtonText = () => {
     if (isRecording) return 'Stop Recording'
-    if (isTranscribing && !modelReady) return 'Getting things ready'
     if (isTranscribing) return 'Transcribing'
     return 'Start Recording'
   }
@@ -101,12 +99,6 @@ export function JournalApp() {
             <Pressable style={styles.playButton} onPress={playRecording}>
               <Text style={styles.playButtonText}>Play Recording</Text>
             </Pressable>
-          ) : null}
-
-          {!modelReady && !isTranscribing ? (
-            <Text style={styles.statusText}>
-              {isWeb ? 'Loading speech recognition model' : 'Requesting microphone permission'}
-            </Text>
           ) : null}
 
           {transcript ? (

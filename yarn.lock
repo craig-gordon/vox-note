@@ -2962,6 +2962,11 @@ dotenv@^16.4.5:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.6.1.tgz#773f0e69527a8315c7285d5ee73c4459d20a8020"
   integrity sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==
 
+dotenv@^17.2.3:
+  version "17.2.3"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-17.2.3.tgz#ad995d6997f639b11065f419a22fabf567cdb9a2"
+  integrity sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==
+
 dotenv@~16.4.5:
   version "16.4.7"
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.4.7.tgz#0e20c5b82950140aa99be360a8a5f52335f53c26"
@@ -3117,6 +3122,11 @@ expo-asset@~55.0.2:
     "@expo/image-utils" "^0.8.11"
     expo-constants "~55.0.2"
 
+expo-audio@~55.0.2:
+  version "55.0.2"
+  resolved "https://registry.yarnpkg.com/expo-audio/-/expo-audio-55.0.2.tgz#206d98e7cea0298b83620072152d4ddec589d349"
+  integrity sha512-EcUBrh39fcJrHxBN4Dk4WE0fh5FVPjnlsQsNVuSNJDtg3SrppUtj4XukyvX270J7CyOPn3pm0eY+4aaUwlXtag==
+
 expo-constants@~17.1.0, expo-constants@~17.1.7:
   version "17.1.8"
   resolved "https://registry.yarnpkg.com/expo-constants/-/expo-constants-17.1.8.tgz#6a59142b9967350bdded3f44859886ec34961aa4"
@@ -3177,11 +3187,6 @@ expo-server@^55.0.2:
   version "55.0.2"
   resolved "https://registry.yarnpkg.com/expo-server/-/expo-server-55.0.2.tgz#0f8de98e3d0839bed24d85deb551340277d3e6ec"
   integrity sha512-tphdvclcniRTKdKx9DSVdpVK3Q5IaMXc5E1AZ4Twd7DlzlrcQ6lOT0PtiUuMi1tip9mSzXQzfFLqfdCnnSz4tw==
-
-expo-speech-recognition@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/expo-speech-recognition/-/expo-speech-recognition-3.0.1.tgz#7d2f291fafca1f2ff2d3253c11bbd81742250c75"
-  integrity sha512-sMyOE1Vq1635B2oG0irgv6MZo0axIva3yNMmy86fwSqcFI+y9GhfOqZnYx3PFq7A0tNP2AlaNZLA9+tkgBcLhQ==
 
 expo-status-bar@~2.2.0:
   version "2.2.3"

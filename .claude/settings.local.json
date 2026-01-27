@@ -1,4 +1,5 @@
 {
+  "ignoredFiles": [".env", "**/.env", "**/.env.*"],
   "permissions": {
     "allow": [
       "Bash(npm install:*)",

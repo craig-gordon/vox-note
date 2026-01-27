@@ -10,11 +10,12 @@
   "dependencies": {
     "@journaling-app/shared": "*",
     "@react-native-async-storage/async-storage": "^2.1.2",
+    "dotenv": "^17.2.3",
     "expo": "~55.0.0-preview",
     "expo-asset": "~11.1.0",
+    "expo-audio": "~55.0.2",
     "expo-constants": "~17.1.0",
     "expo-file-system": "~18.1.0",
-    "expo-speech-recognition": "^3.0.1",
     "expo-status-bar": "~2.2.0",
     "react-native": "0.83.1"
   },

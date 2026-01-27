@@ -6,6 +6,8 @@
     "nohoist": [
       "**/expo",
       "**/expo/**",
+      "**/expo-*",
+      "**/expo-*/**",  
       "**/react-native",
       "**/react-native/**",
       "**/metro",
