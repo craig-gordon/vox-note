@@ -28,6 +28,7 @@ export default {
     },
     extra: {
       openaiApiKey: process.env.VITE_OPENAI_API_KEY,
+      neonDatabaseUrl: process.env.VITE_NEON_DATABASE_CONNECTION_STRING,
     },
   },
 }

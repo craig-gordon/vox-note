@@ -1,5 +1,4 @@
 {
-  "ignoredFiles": [".env", "**/.env", "**/.env.*"],
   "permissions": {
     "allow": [
       "Bash(npm install:*)",
@@ -19,7 +18,15 @@
       "Bash(node -e:*)",
       "Bash(yarn:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "WebFetch(domain:neon.com)",
+      "Bash(claude plugin get:*)",
+      "Bash(claude plugin:*)"
     ]
-  }
+  },
+  "ignoredFiles": [
+    ".env",
+    "**/.env",
+    "**/.env.*"
+  ]
 }
