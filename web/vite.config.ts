@@ -12,7 +12,13 @@ export default defineConfig({
     extensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.web.jsx', '.web.js', '.jsx', '.js']
   },
   optimizeDeps: {
-    include: ['react-native-web', '@journaling-app/shared']
+    include: ['react-native-web', '@journaling-app/shared', 'react-native-calendars'],
+    esbuildOptions: {
+      jsx: 'automatic',
+      loader: {
+        '.js': 'jsx',
+      },
+    },
   },
   server: {
     host: '127.0.0.1',
@@ -22,5 +28,5 @@ export default defineConfig({
     commonjsOptions: {
       include: [/shared/, /node_modules/]
     }
-  }
+  },
 })

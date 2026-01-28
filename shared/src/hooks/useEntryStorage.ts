@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { formatEntryKey } from '../utils/formatEntryKey'
+import { formatEntryKey, formatEntryKeyWithDate } from '../utils/formatEntryKey'
 import type { UseEntryStorageReturn } from './useEntryStorage.types'
 import * as entryRepository from '../db/entryRepository'
 
@@ -14,8 +14,8 @@ export function useEntryStorage(): UseEntryStorageReturn {
     })
   }, [])
 
-  const saveEntry = useCallback(async (content: string): Promise<string> => {
-    const key = formatEntryKey(new Date())
+  const saveEntry = useCallback(async (content: string, customDate?: Date): Promise<string> => {
+    const key = customDate ? formatEntryKeyWithDate(customDate) : formatEntryKey(new Date())
     await entryRepository.saveEntry(key, content)
     const keys = await entryRepository.getAllEntryKeys()
     setEntryKeys(keys)

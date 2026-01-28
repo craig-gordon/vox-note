@@ -4,9 +4,9 @@ See @README for the overall vision of this project and @package.json for availab
 
 This repository is a Yarn workspaces monorepo containing a React web application and a React Native mobile application (that can run on both iOS and Android). The project uses React Native for Web to write components that work on both web and mobile. TypeScript is used across the repository.
 
-The web app uses Vite + SWC.
+The web app uses Vite + SWC. The web app dev server runs at http://127.0.0.1:3000/.
 
-The mobile app uses Expo.
+The mobile app uses Expo Go.
 
 There is a Neon serverless database storing journal entries for shared persistence between the web and mobile apps.
 
@@ -31,10 +31,18 @@ There is a Neon serverless database storing journal entries for shared persisten
     - `tsconfig.json`
     - `src` (put all shared components, hooks, utils, DB code, and other shared logic here)
 
-## Current State
+## Database Schema
 
-- Dev server runs at http://127.0.0.1:3000/
-- No routing, storage, or real features yet
+There is currently 1 table:
+
+journal_entries
+
+It has 4 columns:
+
+- id (serial)
+- entry_key (varchar(20))
+- content (text)
+- created_at (timestamp with time zone)
 
 ## Code Guidelines
 

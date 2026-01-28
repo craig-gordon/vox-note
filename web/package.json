@@ -11,6 +11,7 @@
     "@huggingface/transformers": "^3.8.1",
     "@journaling-app/shared": "*",
     "react-dom": "^19.2.0",
+    "react-native-calendars": "^1.1306.0",
     "react-native-web": "^0.19.12"
   },
   "devDependencies": {

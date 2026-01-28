@@ -11,7 +11,8 @@
   "peerDependencies": {
     "date-fns": "^4.0.0",
     "react": "^19.2.0",
-    "react-native": ">=0.73.0"
+    "react-native": ">=0.73.0",
+    "react-native-calendars": "^1.1306.0"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2"
