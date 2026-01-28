@@ -8,6 +8,8 @@ The web app uses Vite + SWC.
 
 The mobile app uses Expo.
 
+There is a Neon serverless database storing journal entries for shared persistence between the web and mobile apps.
+
 ## Folder Layout
 
 - `mobile`
@@ -27,7 +29,7 @@ The mobile app uses Expo.
 - `shared`
     - `package.json`
     - `tsconfig.json`
-    - `src` (put all shared components, hooks, utils, and other shared logic here)
+    - `src` (put all shared components, hooks, utils, DB code, and other shared logic here)
 
 ## Current State
 
