@@ -7,12 +7,17 @@ export function useEntryStorage(): UseEntryStorageReturn {
   const [entryKeys, setEntryKeys] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  const refreshEntries = useCallback(async () => {
+    const keys = await entryRepository.getAllEntryKeys()
+    setEntryKeys(keys)
+    return keys
+  }, [])
+
   useEffect(() => {
-    entryRepository.getAllEntryKeys().then((keys) => {
-      setEntryKeys(keys)
+    refreshEntries().then(() => {
       setIsLoading(false)
     })
-  }, [])
+  }, [refreshEntries])
 
   const saveEntry = useCallback(async (content: string, customDate?: Date): Promise<string> => {
     const key = customDate ? formatEntryKeyWithDate(customDate) : formatEntryKey(new Date())
@@ -44,6 +49,7 @@ export function useEntryStorage(): UseEntryStorageReturn {
     loadEntry,
     deleteEntry,
     deleteAllEntries,
+    refreshEntries,
   }
 }
 

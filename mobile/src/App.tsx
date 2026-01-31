@@ -1,12 +1,15 @@
 import { StatusBar } from 'expo-status-bar'
 import { SafeAreaView, StyleSheet } from 'react-native'
-import { JournalApp } from '@journaling-app/shared'
+import { JournalProvider } from './context/JournalContext'
+import { SimpleTabNavigator } from './navigation/SimpleTabNavigator'
 
 export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
-      <JournalApp />
+      <JournalProvider>
+        <SimpleTabNavigator />
+      </JournalProvider>
     </SafeAreaView>
   )
 }

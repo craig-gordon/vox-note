@@ -5,6 +5,7 @@ export interface UseEntryStorageReturn {
   loadEntry: (key: string) => Promise<string | null>
   deleteEntry: (key: string) => Promise<void>
   deleteAllEntries: () => Promise<void>
+  refreshEntries: () => Promise<string[]>
 }
 
 export const STORAGE_PREFIX = 'journal_'
