@@ -1,5 +1,6 @@
 {
   "name": "journaling-app",
+  "license": "MIT",
   "private": true,
   "workspaces": {
     "packages": ["shared", "web", "mobile"],
@@ -21,7 +22,11 @@
     "web:build": "yarn workspace @journaling-app/web build",
     "mobile:start": "yarn workspace @journaling-app/mobile start",
     "mobile:ios": "yarn workspace @journaling-app/mobile ios",
-    "mobile:android": "yarn workspace @journaling-app/mobile android"
+    "mobile:android": "yarn workspace @journaling-app/mobile android",
+    "typecheck": "echo Checking root... && tsc && echo Checking web... && yarn workspace @journaling-app/web tsc --noEmit && echo Checking mobile... && yarn workspace @journaling-app/mobile tsc --noEmit && echo Checking shared... && yarn workspace @journaling-app/shared tsc --noEmit && echo All checks passed!",
+    "typecheck:web": "yarn workspace @journaling-app/web tsc --noEmit",
+    "typecheck:mobile": "yarn workspace @journaling-app/mobile tsc --noEmit",
+    "typecheck:shared": "yarn workspace @journaling-app/shared tsc --noEmit"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
