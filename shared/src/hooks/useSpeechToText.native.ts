@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
-import { useAudioRecorder, RecordingPresets, AudioPlayer, requestRecordingPermissionsAsync } from 'expo-audio'
+import { useAudioRecorder, RecordingPresets, createAudioPlayer, requestRecordingPermissionsAsync } from 'expo-audio'
+import type { AudioPlayer } from 'expo-audio'
 import * as FileSystem from 'expo-file-system'
 import Constants from 'expo-constants'
 import { transcribeWithWhisperApi } from '../utils/whisperApi'
@@ -112,7 +113,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
         playerRef.current.release()
       }
 
-      const player = new AudioPlayer(uri)
+      const player = createAudioPlayer(uri)
       playerRef.current = player
       player.play()
     } catch (error) {

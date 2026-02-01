@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
@@ -9,8 +9,15 @@
     "skipLibCheck": true,
     "noEmit": true,
     "allowImportingTsExtensions": true,
-    "types": [],
+    "paths": {
+      "react-native": ["../mobile/node_modules/react-native"]
+    }
   },
   "include": ["src"],
-  "exclude": ["src/**/*.native.ts", "src/**/*.native.tsx", "src/**/*.web.ts", "src/**/*.web.tsx"]
+  "exclude": [
+    "src/**/*.native.ts",
+    "src/**/*.native.tsx",
+    "src/**/*.web.ts",
+    "src/**/*.web.tsx"
+  ]
 }

@@ -1,10 +1,19 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {                                                                         
+      "react-native": ["./mobile/node_modules/react-native"],                          
+      "expo-audio": ["./mobile/node_modules/expo-audio"],                              
+      "expo-file-system": ["./mobile/node_modules/expo-file-system"],                  
+      "expo-constants": ["./mobile/node_modules/expo-constants"]                       
+    }   
   }
 }

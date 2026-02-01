@@ -11,9 +11,14 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "types": ["react-native", "expo"],
+    "baseUrl": ".",
     "paths": {
       "@journaling-app/shared": ["../shared/src"],
-      "@journaling-app/shared/*": ["../shared/src/*"]
+      "@journaling-app/shared/*": ["../shared/src/*"],
+      "react-native": ["./node_modules/react-native"],
+      "expo-audio": ["./node_modules/expo-audio"],
+      "expo-file-system": ["./node_modules/expo-file-system"],
+      "expo-constants": ["./node_modules/expo-constants"]
     }
   },
   "include": [
@@ -21,5 +26,9 @@
     "**/*.tsx",
     "../shared/src/**/*.ts",
     "../shared/src/**/*.tsx"
+  ],
+  "exclude": [
+    "../shared/src/**/*.web.ts",
+    "../shared/src/**/*.web.tsx"
   ]
 }

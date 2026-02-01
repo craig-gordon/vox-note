@@ -30,9 +30,14 @@ export async function transcribeWithWhisperApi(
   const { apiKey, language = 'en', model = 'whisper-1' } = options
 
   const formData = new FormData()
-  // React Native accepts {uri, type, name} objects, web uses Blob
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formData.append('file', audio as any, audio instanceof Blob ? 'recording.webm' : undefined)
+  // React Native accepts {uri, type, name} objects, web uses Blob with filename
+  if (audio instanceof Blob) {
+    // Web: append with filename (3-arg form)
+    (formData.append as (name: string, value: Blob, filename: string) => void)('file', audio, 'recording.webm')
+  } else {
+    // Native: append file descriptor (2-arg form)
+    formData.append('file', audio as unknown as Blob)
+  }
   formData.append('model', model)
   formData.append('language', language)
 
