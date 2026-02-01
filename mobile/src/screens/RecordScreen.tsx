@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, Pressable, ActivityIndicator, ScrollView } from 'react-native'
+import { FontAwesome } from '@expo/vector-icons'
 import { format } from 'date-fns'
 import { useJournal } from '../context/JournalContext'
 
@@ -43,12 +44,6 @@ export function RecordScreen() {
     clearTranscript()
   }
 
-  const getButtonText = () => {
-    if (isRecording) return 'Stop Recording'
-    if (isTranscribing) return 'Transcribing...'
-    return 'Start Recording'
-  }
-
   const isButtonDisabled = isTranscribing
 
   const formatTestButtonDate = () => {
@@ -62,19 +57,17 @@ export function RecordScreen() {
         <Pressable
           style={[
             styles.recordButton,
-            isRecording && styles.recordButtonActive,
             isButtonDisabled && styles.recordButtonDisabled,
           ]}
           onPress={handleRecordPress}
           disabled={isButtonDisabled}
         >
           {isTranscribing ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator color="white" size="small" />
-              <Text style={styles.recordButtonText}>{getButtonText()}</Text>
-            </View>
+            <ActivityIndicator color="white" size="large" />
+          ) : isRecording ? (
+            <FontAwesome name="stop" size={32} color="white" />
           ) : (
-            <Text style={styles.recordButtonText}>{getButtonText()}</Text>
+            <FontAwesome name="microphone" size={40} color="white" />
           )}
         </Pressable>
 
@@ -105,15 +98,11 @@ export function RecordScreen() {
               </Pressable>
             </View>
           </>
-        ) : (
+        ) : isRecording ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>
-              {isRecording
-                ? 'Recording in progress...'
-                : 'Tap the button above to start recording your journal entry'}
-            </Text>
+            <Text style={styles.emptyStateText}>Recording in progress...</Text>
           </View>
-        )}
+        ) : null}
       </View>
     </ScrollView>
   )
@@ -125,38 +114,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   contentContainer: {
+    flexGrow: 1,
     padding: 20,
-    paddingTop: 60,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   recordSection: {
     width: '100%',
     alignItems: 'center',
   },
   recordButton: {
-    backgroundColor: '#007AFF',
-    padding: 20,
-    borderRadius: 12,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#E74C3C',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
-    width: '100%',
-    maxWidth: 300,
-  },
-  recordButtonActive: {
-    backgroundColor: '#FF3B30',
   },
   recordButtonDisabled: {
-    backgroundColor: '#999',
-  },
-  recordButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  loadingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+    opacity: 0.5,
   },
   transcriptContainer: {
     backgroundColor: 'white',

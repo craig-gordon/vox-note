@@ -70,3 +70,17 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Fix for react-native-calendars arrows not showing on web */
+[data-testid$=".header.leftArrow"]::before {
+  content: '‹';
+  font-size: 28px;
+  color: #007AFF;
+  font-weight: bold;
+}
+[data-testid$=".header.rightArrow"]::before {
+  content: '›';
+  font-size: 28px;
+  color: #007AFF;
+  font-weight: bold;
+}
