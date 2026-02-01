@@ -15,6 +15,7 @@ export default defineConfig({
     include: ['react-native-web', '@journaling-app/shared', 'react-native-calendars'],
     esbuildOptions: {
       jsx: 'automatic',
+      resolveExtensions: ['.web.tsx', '.web.ts', '.tsx', '.ts', '.web.jsx', '.web.js', '.jsx', '.js'],
       loader: {
         '.js': 'jsx',
       },
