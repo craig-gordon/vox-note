@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from 'react'
-import { View, Text, StyleSheet, Pressable, ScrollView, RefreshControl } from 'react-native'
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import type { DateData } from 'react-native-calendars'
-import { formatEntryKeyReadable, formatDateForDisplay } from '@journaling-app/shared'
+import { formatEntryKeyReadable, formatDateForDisplay, formatEntryLabel } from '@journaling-app/shared'
 import { useJournal } from '../context/JournalContext'
 
 export function CalendarScreen() {
@@ -16,8 +16,6 @@ export function CalendarScreen() {
     setSelectedEntry,
     handleSelectEntry,
     deleteAllEntries,
-    refreshEntries,
-    isRefreshing,
     loadEntry,
   } = useJournal()
 
@@ -51,19 +49,9 @@ export function CalendarScreen() {
   }, [entriesForSelectedDate, selectedEntry, loadEntry, setSelectedEntry])
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={refreshEntries}
-          colors={['#007AFF']}
-          tintColor="#007AFF"
-        />
-      }
-    >
-      <View style={styles.entriesHeader}>
+    <View style={styles.container}>
+      <View style={styles.topSection}>
+        <View style={styles.entriesHeader}>
         <Text style={styles.entriesSectionTitle}>Journal Calendar</Text>
         {entryKeys.length > 0 ? (
           <Pressable onPress={handleClearAllEntries}>
@@ -124,19 +112,25 @@ export function CalendarScreen() {
           </Text>
         </View>
       ) : null}
+      </View>
 
       {selectedEntry ? (
         <View style={styles.selectedEntryContainer}>
           <View style={styles.selectedEntryHeader}>
-            <Text style={styles.selectedEntryLabel}>{formatEntryKeyReadable(selectedEntry.key)}</Text>
+            <Text style={styles.selectedEntryLabel}>{formatEntryLabel(selectedEntry.key, entriesForSelectedDate.length > 1)}</Text>
             <Pressable onPress={handleCloseEntry}>
               <Text style={styles.closeText}>Close</Text>
             </Pressable>
           </View>
-          <Text style={styles.selectedEntryText}>{selectedEntry.content}</Text>
+          <ScrollView
+            style={styles.selectedEntryScroll}
+            contentContainerStyle={styles.selectedEntryContent}
+          >
+            <Text style={styles.selectedEntryText}>{selectedEntry.content}</Text>
+          </ScrollView>
         </View>
       ) : null}
-    </ScrollView>
+    </View>
   )
 }
 
@@ -145,9 +139,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  contentContainer: {
+  topSection: {
     padding: 16,
     paddingTop: 50,
+    paddingBottom: 0,
   },
   entriesHeader: {
     flexDirection: 'row',
@@ -211,17 +206,28 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectedEntryContainer: {
+    flex: 1,
     backgroundColor: 'white',
-    padding: 15,
+    paddingVertical: 15,
+    paddingRight: 6,
+    marginHorizontal: 16,
+    marginBottom: 16,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  selectedEntryScroll: {
+    flex: 1,
+  },
+  selectedEntryContent: {
+    paddingHorizontal: 15,
   },
   selectedEntryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
+    paddingHorizontal: 15,
   },
   selectedEntryLabel: {
     fontSize: 14,

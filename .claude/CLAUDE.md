@@ -1,5 +1,9 @@
 See @README for the overall vision of this project and @package.json for available npm commands.
 
+# IMPORTANT
+
+For now, ignore the web app. The mobile app is the primary focus. We should still put functionality that can be used by both projects in the shared folder but when adding features to the mobile app, don't bother making changes to the web to keep parity with mobile.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

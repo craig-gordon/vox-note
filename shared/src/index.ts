@@ -14,6 +14,6 @@ export type { UseSpeechToTextReturn, RecordingState } from './hooks/useSpeechToT
 export type { UseEntryStorageReturn } from './hooks/useEntryStorage.types'
 
 // Utils
-export { formatEntryKey, formatEntryKeyReadable } from './utils/formatEntryKey'
+export { formatEntryKey, formatEntryKeyReadable, formatEntryLabel } from './utils/formatEntryKey'
 export { formatDateForDisplay } from './utils/entryDateUtils'
 export { suppressKnownWarnings } from './utils/suppressLogs'
