@@ -21,16 +21,14 @@ function InsightCard({ insight }: { insight: InsightItem }) {
 
 function getColorForType(type: InsightItem['type']): string {
   switch (type) {
-    case 'mood':
-      return '#FF6B6B'
-    case 'energy':
-      return '#FFB84D'
-    case 'productivity':
-      return '#4CAF50'
     case 'pattern':
       return '#5C6BC0'
-    case 'suggestion':
+    case 'connection':
+      return '#FF9800'
+    case 'question':
       return '#26A69A'
+    case 'suggestion':
+      return '#4CAF50'
     default:
       return '#666'
   }

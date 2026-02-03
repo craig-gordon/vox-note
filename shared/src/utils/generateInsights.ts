@@ -1,7 +1,7 @@
 import { chatCompletion, type ChatMessage } from './llmApi'
 import type { EntryWithContent } from '../db/entryRepository'
 
-export type InsightType = 'mood' | 'energy' | 'productivity' | 'pattern' | 'suggestion'
+export type InsightType = 'pattern' | 'connection' | 'question' | 'suggestion'
 
 export interface InsightItem {
   type: InsightType
@@ -15,30 +15,40 @@ export interface InsightsResult {
   analyzedEntryCount: number
 }
 
-const SYSTEM_PROMPT = `You are a thoughtful journal analyst helping users understand patterns in their life.
-Analyze the provided journal entries and return insights in JSON format.
+const SYSTEM_PROMPT = `You are a thoughtful journal analyst. Your job is to provide genuine insight—not summaries.
 
-Return a JSON object with an "insights" array containing 3-5 insight objects. Each insight should have:
-- type: one of "mood", "energy", "productivity", "pattern", or "suggestion"
-- title: a short title (5-8 words max)
-- description: a brief 1-2 sentence explanation
-- icon: an Ionicons icon name that fits the insight (e.g., "happy-outline", "flash-outline", "trending-up-outline", "repeat-outline", "bulb-outline")
+CRITICAL RULES:
+1. NEVER restate what the user already said. They wrote it; they know it.
+2. CONSOLIDATE related themes into ONE insight. If multiple entries touch on the same topic, that's ONE insight about a pattern, not separate items.
+3. ADD ANALYTICAL VALUE: identify cause/effect relationships, contradictions, or non-obvious patterns the user may not have noticed.
+4. Return 2-4 insights maximum. Fewer high-quality insights beat more repetitive ones.
 
-Focus on:
-- Mood/emotional patterns across entries
-- Energy levels and what affects them
-- Behavioral patterns (recurring themes, habits)
-- One actionable suggestion based on patterns
+INSIGHT TYPES (use the most appropriate):
+- "pattern": Recurring behavior or theme across multiple entries
+- "connection": A link between two things the user mentioned separately (e.g., "You felt energized on days you exercised")
+- "question": A thoughtful prompt encouraging deeper reflection (not rhetorical fluff)
+- "suggestion": ONE specific, actionable next step based on what seems to be working or not
 
-Be empathetic and constructive. Avoid clinical language.
+CONTEXT-BASED APPROACH:
+- With 1 entry: Don't force patterns. Focus on 1-2 reflection questions and maybe 1 suggestion. Acknowledge limited data.
+- With 2-3 entries: Look for emerging patterns or connections between entries.
+- With 4+ entries: Full pattern analysis across the week.
+
+FORMAT:
+Return a JSON object with an "insights" array. Each insight has:
+- type: one of "pattern", "connection", "question", "suggestion"
+- title: 4-7 words, specific (not generic like "Positive Mindset Observed")
+- description: 1-2 sentences that ADD VALUE beyond what the user wrote
+- icon: Ionicons name (e.g., "link-outline", "help-circle-outline", "bulb-outline", "repeat-outline", "flash-outline", "heart-outline")
 
 IMPORTANT: Return ONLY valid JSON, no markdown or explanation.`
 
 function formatEntriesForPrompt(entries: EntryWithContent[]): string {
   return entries
     .map((e) => {
-      const date = e.entry_key.slice(0, 10) // YYYY-MM-DD
-      return `[${date}]\n${e.content}`
+      // Parse date from entry_key format MM-DD-YY_HH:MM:SSAM/PM
+      const datePart = e.entry_key.slice(0, 8) // MM-DD-YY
+      return `[${datePart}]\n${e.content}`
     })
     .join('\n\n---\n\n')
 }
@@ -52,9 +62,13 @@ export async function generateInsights(
   }
 
   const formattedEntries = formatEntriesForPrompt(entries)
+  const entryCountContext = entries.length === 1
+    ? 'Note: There is only 1 entry this week. Focus on reflection questions rather than forcing patterns.'
+    : `Note: There are ${entries.length} entries to analyze.`
+
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'user', content: `Here are my journal entries from the past week:\n\n${formattedEntries}` },
+    { role: 'user', content: `${entryCountContext}\n\nHere are my journal entries from the past week:\n\n${formattedEntries}` },
   ]
 
   const result = await chatCompletion(messages, { apiKey })
