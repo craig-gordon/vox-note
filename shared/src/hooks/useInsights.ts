@@ -1,37 +1,52 @@
 import { useState, useCallback, useRef } from 'react'
 import { getEntriesForDateRange } from '../db/entryRepository'
-import { generateInsights, type InsightsResult } from '../utils/generateInsights'
+import { saveInsight, getLatestInsight, updateInsightFeedback, type StoredInsight, type FeedbackType } from '../db/insightsRepository'
+import { generateInsights } from '../utils/generateInsights'
 
 export interface UseInsightsReturn {
-  insights: InsightsResult | null
+  insight: StoredInsight | null
   isLoading: boolean
-  isRefreshing: boolean
+  isGenerating: boolean
   error: string | null
-  fetchInsights: () => Promise<void>
+  loadLatestInsight: () => Promise<void>
+  generateNewInsight: () => Promise<void>
+  submitFeedback: (feedback: FeedbackType) => Promise<void>
 }
 
 export function useInsights(apiKey: string | undefined): UseInsightsReturn {
-  const [insights, setInsights] = useState<InsightsResult | null>(null)
+  const [insight, setInsight] = useState<StoredInsight | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const isFetchingRef = useRef(false)
+  const isOperationInProgress = useRef(false)
 
-  const fetchInsights = useCallback(async () => {
+  const loadLatestInsight = useCallback(async () => {
+    if (isOperationInProgress.current) return
+    isOperationInProgress.current = true
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const latest = await getLatestInsight()
+      setInsight(latest)
+    } catch (err) {
+      console.error('Failed to load insight:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load insight')
+    } finally {
+      setIsLoading(false)
+      isOperationInProgress.current = false
+    }
+  }, [])
+
+  const generateNewInsight = useCallback(async () => {
     if (!apiKey) {
       setError('API key not configured')
       return
     }
 
-    if (isFetchingRef.current) return
-    isFetchingRef.current = true
-
-    // Show loading only if no cached insights
-    if (!insights) {
-      setIsLoading(true)
-    } else {
-      setIsRefreshing(true)
-    }
+    if (isOperationInProgress.current) return
+    isOperationInProgress.current = true
+    setIsGenerating(true)
     setError(null)
 
     try {
@@ -41,22 +56,39 @@ export function useInsights(apiKey: string | undefined): UseInsightsReturn {
 
       const entries = await getEntriesForDateRange(startDate, endDate)
       const result = await generateInsights(entries, apiKey)
-      setInsights(result)
+
+      // Save to DB and update state
+      const saved = await saveInsight(entries, result)
+      setInsight(saved)
     } catch (err) {
-      console.error('Failed to generate insights:', err)
-      setError(err instanceof Error ? err.message : 'Failed to generate insights')
+      console.error('Failed to generate insight:', err)
+      setError(err instanceof Error ? err.message : 'Failed to generate insight')
     } finally {
-      setIsLoading(false)
-      setIsRefreshing(false)
-      isFetchingRef.current = false
+      setIsGenerating(false)
+      isOperationInProgress.current = false
     }
-  }, [apiKey, insights])
+  }, [apiKey])
+
+  const submitFeedback = useCallback(async (feedback: FeedbackType) => {
+    if (!insight) return
+
+    try {
+      await updateInsightFeedback(insight.id, feedback)
+      setInsight({ ...insight, feedback })
+    } catch (err) {
+      console.error('Failed to submit feedback:', err)
+    }
+  }, [insight])
 
   return {
-    insights,
+    insight,
     isLoading,
-    isRefreshing,
+    isGenerating,
     error,
-    fetchInsights,
+    loadLatestInsight,
+    generateNewInsight,
+    submitFeedback,
   }
 }
+
+export type { FeedbackType } from '../db/insightsRepository'

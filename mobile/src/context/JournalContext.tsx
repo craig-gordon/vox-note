@@ -8,6 +8,7 @@ import {
   type UseSpeechToTextReturn,
   type UseEntryStorageReturn,
   type UseInsightsReturn,
+  type FeedbackType,
 } from '@journaling-app/shared'
 
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.openaiApiKey as string | undefined
@@ -51,11 +52,13 @@ interface JournalContextValue {
   handleSelectEntry: (key: string) => Promise<void>
 
   // Insights
-  insights: UseInsightsReturn['insights']
+  insight: UseInsightsReturn['insight']
   insightsLoading: boolean
-  insightsRefreshing: boolean
+  insightsGenerating: boolean
   insightsError: string | null
-  refreshInsights: () => Promise<void>
+  loadLatestInsight: () => Promise<void>
+  generateNewInsight: () => Promise<void>
+  submitInsightFeedback: (feedback: FeedbackType) => Promise<void>
 }
 
 const JournalContext = createContext<JournalContextValue | null>(null)
@@ -73,9 +76,9 @@ export function JournalProvider({ children }: JournalProviderProps) {
   const calendarEntries = useCalendarEntries(entryStorage.entryKeys)
   const insightsHook = useInsights(OPENAI_API_KEY)
 
-  // Pre-fetch insights on mount
+  // Load latest insight from DB on mount
   useEffect(() => {
-    insightsHook.fetchInsights()
+    insightsHook.loadLatestInsight()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshEntries = useCallback(async () => {
@@ -91,14 +94,6 @@ export function JournalProvider({ children }: JournalProviderProps) {
     }
   }, [entryStorage])
 
-  // Wrap saveEntry to trigger insights refresh after save
-  const saveEntryWithInsightsRefresh = useCallback(async (content: string, customDate?: Date) => {
-    const key = await entryStorage.saveEntry(content, customDate)
-    // Refresh insights in background (non-blocking)
-    insightsHook.fetchInsights()
-    return key
-  }, [entryStorage, insightsHook])
-
   const value: JournalContextValue = {
     // Speech to text
     isRecording: speechToText.isRecording,
@@ -113,7 +108,7 @@ export function JournalProvider({ children }: JournalProviderProps) {
     // Entry storage
     entryKeys: entryStorage.entryKeys,
     isLoading: entryStorage.isLoading,
-    saveEntry: saveEntryWithInsightsRefresh,
+    saveEntry: entryStorage.saveEntry,
     loadEntry: entryStorage.loadEntry,
     deleteEntry: entryStorage.deleteEntry,
     deleteAllEntries: entryStorage.deleteAllEntries,
@@ -133,11 +128,13 @@ export function JournalProvider({ children }: JournalProviderProps) {
     handleSelectEntry,
 
     // Insights
-    insights: insightsHook.insights,
+    insight: insightsHook.insight,
     insightsLoading: insightsHook.isLoading,
-    insightsRefreshing: insightsHook.isRefreshing,
+    insightsGenerating: insightsHook.isGenerating,
     insightsError: insightsHook.error,
-    refreshInsights: insightsHook.fetchInsights,
+    loadLatestInsight: insightsHook.loadLatestInsight,
+    generateNewInsight: insightsHook.generateNewInsight,
+    submitInsightFeedback: insightsHook.submitFeedback,
   }
 
   return (

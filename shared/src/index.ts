@@ -13,7 +13,7 @@ export { useInsights } from './hooks/useInsights'
 // Hooks - types
 export type { UseSpeechToTextReturn, RecordingState } from './hooks/useSpeechToText.types'
 export type { UseEntryStorageReturn } from './hooks/useEntryStorage.types'
-export type { UseInsightsReturn } from './hooks/useInsights'
+export type { UseInsightsReturn, FeedbackType } from './hooks/useInsights'
 
 // Utils
 export { formatEntryKey, formatEntryKeyReadable, formatEntryLabel } from './utils/formatEntryKey'

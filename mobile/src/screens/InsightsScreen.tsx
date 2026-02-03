@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useJournal } from '../context/JournalContext'
-import type { InsightItem } from '@journaling-app/shared'
+import type { InsightItem, FeedbackType } from '@journaling-app/shared'
 
 function InsightCard({ insight }: { insight: InsightItem }) {
   return (
@@ -34,34 +34,82 @@ function getColorForType(type: InsightItem['type']): string {
   }
 }
 
-export function InsightsScreen() {
-  const { insights, insightsLoading, insightsRefreshing, insightsError, refreshInsights } = useJournal()
+interface FeedbackButtonProps {
+  type: FeedbackType
+  icon: keyof typeof Ionicons.glyphMap
+  selectedIcon: keyof typeof Ionicons.glyphMap
+  color: string
+  isSelected: boolean
+  onPress: () => void
+}
 
-  // Loading state (only shown when no cached insights)
+function FeedbackButton({ type, icon, selectedIcon, color, isSelected, onPress }: FeedbackButtonProps) {
+  return (
+    <Pressable
+      style={[styles.feedbackButton, isSelected && { backgroundColor: color + '20' }]}
+      onPress={onPress}
+    >
+      <Ionicons
+        name={isSelected ? selectedIcon : icon}
+        size={28}
+        color={isSelected ? color : '#999'}
+      />
+    </Pressable>
+  )
+}
+
+export function InsightsScreen() {
+  const {
+    insight,
+    insightsLoading,
+    insightsGenerating,
+    insightsError,
+    generateNewInsight,
+    submitInsightFeedback,
+  } = useJournal()
+
+  // Loading state (fetching from DB)
   if (insightsLoading) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Analyzing your journal entries...</Text>
+        <Text style={styles.loadingText}>Loading insights...</Text>
       </View>
     )
   }
 
   // Error state
-  if (insightsError && !insights) {
+  if (insightsError && !insight) {
     return (
       <View style={styles.centerContainer}>
         <Ionicons name="alert-circle-outline" size={60} color="#FF6B6B" />
         <Text style={styles.errorText}>{insightsError}</Text>
-        <Pressable style={styles.retryButton} onPress={refreshInsights}>
+        <Pressable style={styles.retryButton} onPress={generateNewInsight}>
           <Text style={styles.retryButtonText}>Try Again</Text>
         </Pressable>
       </View>
     )
   }
 
-  // Empty state (no entries in past week)
-  if (insights && insights.analyzedEntryCount === 0) {
+  // No insights yet - prompt to generate
+  if (!insight) {
+    return (
+      <View style={styles.centerContainer}>
+        <Ionicons name="bulb-outline" size={60} color="#ccc" />
+        <Text style={styles.emptyTitle}>No Insights Yet</Text>
+        <Text style={styles.emptySubtitle}>
+          Generate AI-powered insights from your journal entries.
+        </Text>
+        <Pressable style={styles.generateButton} onPress={generateNewInsight}>
+          <Ionicons name="sparkles-outline" size={20} color="#fff" />
+          <Text style={styles.generateButtonText}>Generate Insights</Text>
+        </Pressable>
+      </View>
+    )
+  }
+
+  // Empty result (no entries in past week)
+  if (insight.result.analyzedEntryCount === 0) {
     return (
       <View style={styles.centerContainer}>
         <Ionicons name="journal-outline" size={60} color="#ccc" />
@@ -73,41 +121,61 @@ export function InsightsScreen() {
     )
   }
 
-  // No insights generated yet
-  if (!insights || insights.insights.length === 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <Ionicons name="bulb-outline" size={60} color="#ccc" />
-        <Text style={styles.emptyTitle}>No Insights Yet</Text>
-        <Text style={styles.emptySubtitle}>
-          Keep journaling to discover patterns in your week.
-        </Text>
-      </View>
-    )
-  }
+  const insights = insight.result.insights
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Weekly Insights</Text>
         <View style={styles.headerRight}>
-          {insightsRefreshing && (
-            <Text style={styles.updatingText}>Updating...</Text>
+          {insightsGenerating && (
+            <Text style={styles.updatingText}>Generating...</Text>
           )}
-          <Pressable onPress={refreshInsights} style={styles.refreshButton}>
-            <Ionicons name="refresh-outline" size={22} color="#007AFF" />
+          <Pressable onPress={generateNewInsight} style={styles.refreshButton} disabled={insightsGenerating}>
+            <Ionicons name="refresh-outline" size={22} color={insightsGenerating ? '#ccc' : '#007AFF'} />
           </Pressable>
         </View>
       </View>
 
       <Text style={styles.subheader}>
-        Based on {insights.analyzedEntryCount} {insights.analyzedEntryCount === 1 ? 'entry' : 'entries'} from the past week
+        Based on {insight.result.analyzedEntryCount} {insight.result.analyzedEntryCount === 1 ? 'entry' : 'entries'} from the past week
       </Text>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        {insights.insights.map((insight, index) => (
-          <InsightCard key={index} insight={insight} />
+        {insights.map((item, index) => (
+          <InsightCard key={index} insight={item} />
         ))}
+
+        {/* Feedback Section */}
+        <View style={styles.feedbackSection}>
+          <Text style={styles.feedbackLabel}>Was this helpful?</Text>
+          <View style={styles.feedbackButtons}>
+            <FeedbackButton
+              type="positive"
+              icon="happy-outline"
+              selectedIcon="happy"
+              color="#4CAF50"
+              isSelected={insight.feedback === 'positive'}
+              onPress={() => submitInsightFeedback('positive')}
+            />
+            <FeedbackButton
+              type="neutral"
+              icon="remove-circle-outline"
+              selectedIcon="remove-circle"
+              color="#FF9800"
+              isSelected={insight.feedback === 'neutral'}
+              onPress={() => submitInsightFeedback('neutral')}
+            />
+            <FeedbackButton
+              type="negative"
+              icon="sad-outline"
+              selectedIcon="sad"
+              color="#F44336"
+              isSelected={insight.feedback === 'negative'}
+              onPress={() => submitInsightFeedback('negative')}
+            />
+          </View>
+        </View>
       </ScrollView>
     </View>
   )
@@ -228,5 +296,46 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+  generateButton: {
+    marginTop: 24,
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  generateButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  feedbackSection: {
+    marginTop: 16,
+    alignItems: 'center',
+  },
+  feedbackLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  feedbackButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  feedbackButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
 })

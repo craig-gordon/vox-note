@@ -21,7 +21,8 @@
       "Bash(git commit:*)",
       "WebFetch(domain:neon.com)",
       "Bash(claude plugin get:*)",
-      "Bash(claude plugin:*)"
+      "Bash(claude plugin:*)",
+      "mcp__plugin_neon-plugin_neon__list_projects"
     ]
   },
   "ignoredFiles": [
