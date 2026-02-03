@@ -35,3 +35,19 @@ export async function deleteAllEntries(): Promise<void> {
   const sql = getNeonClient()
   await sql`DELETE FROM journal_entries`
 }
+
+export interface EntryWithContent {
+  entry_key: string
+  content: string
+}
+
+export async function getEntriesForDateRange(startDate: Date, endDate: Date): Promise<EntryWithContent[]> {
+  const sql = getNeonClient()
+  const result = (await sql`
+    SELECT entry_key, content
+    FROM journal_entries
+    WHERE created_at >= ${startDate.toISOString()} AND created_at <= ${endDate.toISOString()}
+    ORDER BY created_at DESC
+  `) as EntryWithContent[]
+  return result
+}

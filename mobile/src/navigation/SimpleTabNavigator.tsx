@@ -19,7 +19,7 @@ interface TabConfig {
 const tabs: TabConfig[] = [
   { name: 'Record', icon: 'mic-outline', iconFocused: 'mic', component: RecordScreen },
   { name: 'Journal', icon: 'book-outline', iconFocused: 'book', component: CalendarScreen },
-  { name: 'Insights', icon: 'bulb-outline', iconFocused: 'bulb', component: InsightsScreen, disabled: true },
+  { name: 'Insights', icon: 'bulb-outline', iconFocused: 'bulb', component: InsightsScreen },
 ]
 
 export function SimpleTabNavigator() {

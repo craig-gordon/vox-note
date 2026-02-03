@@ -1,11 +1,16 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react'
+import Constants from 'expo-constants'
 import {
   useSpeechToText,
   useEntryStorage,
   useCalendarEntries,
+  useInsights,
   type UseSpeechToTextReturn,
   type UseEntryStorageReturn,
+  type UseInsightsReturn,
 } from '@journaling-app/shared'
+
+const OPENAI_API_KEY = Constants.expoConfig?.extra?.openaiApiKey as string | undefined
 
 interface SelectedEntry {
   key: string
@@ -44,6 +49,13 @@ interface JournalContextValue {
   selectedEntry: SelectedEntry | null
   setSelectedEntry: (entry: SelectedEntry | null) => void
   handleSelectEntry: (key: string) => Promise<void>
+
+  // Insights
+  insights: UseInsightsReturn['insights']
+  insightsLoading: boolean
+  insightsRefreshing: boolean
+  insightsError: string | null
+  refreshInsights: () => Promise<void>
 }
 
 const JournalContext = createContext<JournalContextValue | null>(null)
@@ -59,6 +71,12 @@ export function JournalProvider({ children }: JournalProviderProps) {
   const speechToText = useSpeechToText()
   const entryStorage = useEntryStorage()
   const calendarEntries = useCalendarEntries(entryStorage.entryKeys)
+  const insightsHook = useInsights(OPENAI_API_KEY)
+
+  // Pre-fetch insights on mount
+  useEffect(() => {
+    insightsHook.fetchInsights()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshEntries = useCallback(async () => {
     setIsRefreshing(true)
@@ -72,6 +90,14 @@ export function JournalProvider({ children }: JournalProviderProps) {
       setSelectedEntry({ key, content })
     }
   }, [entryStorage])
+
+  // Wrap saveEntry to trigger insights refresh after save
+  const saveEntryWithInsightsRefresh = useCallback(async (content: string, customDate?: Date) => {
+    const key = await entryStorage.saveEntry(content, customDate)
+    // Refresh insights in background (non-blocking)
+    insightsHook.fetchInsights()
+    return key
+  }, [entryStorage, insightsHook])
 
   const value: JournalContextValue = {
     // Speech to text
@@ -87,7 +113,7 @@ export function JournalProvider({ children }: JournalProviderProps) {
     // Entry storage
     entryKeys: entryStorage.entryKeys,
     isLoading: entryStorage.isLoading,
-    saveEntry: entryStorage.saveEntry,
+    saveEntry: saveEntryWithInsightsRefresh,
     loadEntry: entryStorage.loadEntry,
     deleteEntry: entryStorage.deleteEntry,
     deleteAllEntries: entryStorage.deleteAllEntries,
@@ -105,6 +131,13 @@ export function JournalProvider({ children }: JournalProviderProps) {
     selectedEntry,
     setSelectedEntry,
     handleSelectEntry,
+
+    // Insights
+    insights: insightsHook.insights,
+    insightsLoading: insightsHook.isLoading,
+    insightsRefreshing: insightsHook.isRefreshing,
+    insightsError: insightsHook.error,
+    refreshInsights: insightsHook.fetchInsights,
   }
 
   return (
