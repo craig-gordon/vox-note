@@ -8,6 +8,7 @@ export function RecordScreen() {
     isRecording,
     isTranscribing,
     transcript,
+    recordingDuration,
     startRecording,
     stopRecording,
     clearTranscript,
@@ -100,6 +101,9 @@ export function RecordScreen() {
           </>
         ) : isRecording ? (
           <View style={styles.emptyState}>
+            <Text style={styles.timerText}>
+              {String(Math.floor(recordingDuration / 60)).padStart(2, '0')}:{String(recordingDuration % 60).padStart(2, '0')}
+            </Text>
             <Text style={styles.emptyStateText}>Recording in progress...</Text>
           </View>
         ) : null}
@@ -213,6 +217,13 @@ const styles = StyleSheet.create({
   emptyState: {
     padding: 20,
     alignItems: 'center',
+  },
+  timerText: {
+    fontSize: 36,
+    fontWeight: '300',
+    fontVariant: ['tabular-nums'],
+    color: '#E74C3C',
+    marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 16,

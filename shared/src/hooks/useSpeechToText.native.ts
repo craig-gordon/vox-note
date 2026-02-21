@@ -1,8 +1,9 @@
 import { useState, useRef, useCallback } from 'react'
-import { useAudioRecorder, RecordingPresets, createAudioPlayer, requestRecordingPermissionsAsync } from 'expo-audio'
+import { useAudioRecorder, RecordingPresets, createAudioPlayer, requestRecordingPermissionsAsync, setAudioModeAsync } from 'expo-audio'
 import type { AudioPlayer } from 'expo-audio'
 import * as FileSystem from 'expo-file-system'
 import Constants from 'expo-constants'
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake'
 import { transcribeWithWhisperApi } from '../utils/whisperApi'
 import type { RecordingState, UseSpeechToTextReturn } from './useSpeechToText.types'
 
@@ -12,9 +13,11 @@ export function useSpeechToText(): UseSpeechToTextReturn {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [transcript, setTranscript] = useState('')
   const [hasRecordedAudio, setHasRecordedAudio] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState(0)
 
   const lastRecordingUriRef = useRef<string | null>(null)
   const playerRef = useRef<AudioPlayer | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY)
 
@@ -35,18 +38,30 @@ export function useSpeechToText(): UseSpeechToTextReturn {
         return
       }
 
+      await activateKeepAwakeAsync('recording')
+      await setAudioModeAsync({ allowsRecording: true, interruptionMode: 'doNotMix' })
+
       await audioRecorder.prepareToRecordAsync()
       audioRecorder.record()
       setRecordingState('recording')
+      setRecordingDuration(0)
+      timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000)
       console.log('Recording started')
     } catch (error) {
       console.error('Failed to start recording:', error)
+      deactivateKeepAwake('recording')
       setRecordingState('idle')
     }
   }, [recordingState, audioRecorder])
 
   const stopRecording = useCallback(async () => {
     if (recordingState !== 'recording') return
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    deactivateKeepAwake('recording')
 
     try {
       await audioRecorder.stop()
@@ -72,7 +87,15 @@ export function useSpeechToText(): UseSpeechToTextReturn {
         return
       }
 
-      console.log('Audio recorded:', ((fileInfo.size || 0) / 1024).toFixed(1), 'KB')
+      const fileSizeKB = (fileInfo.size || 0) / 1024
+      console.log('Audio recorded:', fileSizeKB.toFixed(1), 'KB')
+
+      if (fileSizeKB < 10) {
+        console.warn('Recording too short:', fileSizeKB.toFixed(1), 'KB')
+        setTranscript('[Recording too short — please try again]')
+        setRecordingState('idle')
+        return
+      }
 
       setRecordingState('transcribing')
       console.log('Sending to Whisper API...')
@@ -142,6 +165,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     transcript,
     recordingState,
     hasRecordedAudio,
+    recordingDuration,
     startRecording,
     stopRecording,
     clearTranscript,

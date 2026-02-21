@@ -24,6 +24,7 @@ interface JournalContextValue {
   isTranscribing: boolean
   transcript: string
   hasRecordedAudio: boolean
+  recordingDuration: number
   startRecording: () => Promise<void>
   stopRecording: () => void
   clearTranscript: () => void
@@ -109,6 +110,7 @@ export function JournalProvider({ children }: JournalProviderProps) {
     isTranscribing: speechToText.isTranscribing,
     transcript: speechToText.transcript,
     hasRecordedAudio: speechToText.hasRecordedAudio,
+    recordingDuration: speechToText.recordingDuration,
     startRecording: speechToText.startRecording,
     stopRecording: speechToText.stopRecording,
     clearTranscript: speechToText.clearTranscript,

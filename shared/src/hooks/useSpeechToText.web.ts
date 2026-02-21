@@ -129,6 +129,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     transcript,
     recordingState,
     hasRecordedAudio,
+    recordingDuration: 0,
     startRecording,
     stopRecording,
     clearTranscript,

@@ -24,7 +24,8 @@
       "Bash(claude plugin:*)",
       "mcp__plugin_neon-plugin_neon__list_projects",
       "mcp__plugin_neon-plugin_neon__list_docs_resources",
-      "mcp__plugin_neon-plugin_neon__get_doc_resource"
+      "mcp__plugin_neon-plugin_neon__get_doc_resource",
+      "Bash(npx tsc:*)"
     ]
   },
   "ignoredFiles": [
