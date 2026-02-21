@@ -2,7 +2,7 @@ import 'dotenv/config'
 
 export default {
   expo: {
-    name: 'Journaling App',
+    name: 'Vox Note',
     slug: 'journaling-app',
     version: '1.0.0',
     orientation: 'portrait',

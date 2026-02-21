@@ -7,7 +7,7 @@ export interface ChatCompletionOptions {
   apiKey: string
   model?: string
   temperature?: number
-  maxTokens?: number
+  maxCompletionTokens?: number
 }
 
 export interface ChatCompletionResult {
@@ -21,7 +21,7 @@ export async function chatCompletion(
   messages: ChatMessage[],
   options: ChatCompletionOptions
 ): Promise<ChatCompletionResult> {
-  const { apiKey, model = 'gpt-4o', temperature = 0.7, maxTokens = 1024 } = options
+  const { apiKey, model = 'gpt-5.2', temperature = 0.7, maxCompletionTokens = 1024 } = options
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -33,7 +33,7 @@ export async function chatCompletion(
       model,
       messages,
       temperature,
-      max_tokens: maxTokens,
+      max_completion_tokens: maxCompletionTokens,
     }),
   })
 

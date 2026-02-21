@@ -94,6 +94,14 @@ export function JournalProvider({ children }: JournalProviderProps) {
     }
   }, [entryStorage])
 
+  // Wrap saveEntry to regenerate insights after save
+  const saveEntryAndRegenerateInsights = useCallback(async (content: string, customDate?: Date) => {
+    const key = await entryStorage.saveEntry(content, customDate)
+    // Regenerate insights in background (non-blocking)
+    insightsHook.generateNewInsight()
+    return key
+  }, [entryStorage, insightsHook])
+
   const value: JournalContextValue = {
     // Speech to text
     isRecording: speechToText.isRecording,
@@ -108,7 +116,7 @@ export function JournalProvider({ children }: JournalProviderProps) {
     // Entry storage
     entryKeys: entryStorage.entryKeys,
     isLoading: entryStorage.isLoading,
-    saveEntry: entryStorage.saveEntry,
+    saveEntry: saveEntryAndRegenerateInsights,
     loadEntry: entryStorage.loadEntry,
     deleteEntry: entryStorage.deleteEntry,
     deleteAllEntries: entryStorage.deleteAllEntries,
