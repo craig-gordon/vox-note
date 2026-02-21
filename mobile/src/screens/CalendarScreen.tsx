@@ -50,7 +50,8 @@ export function CalendarScreen() {
       }
     }
     autoLoadSingleEntry()
-  }, [entriesForSelectedDate, selectedEntry, loadEntry, setSelectedEntry])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesForSelectedDate, loadEntry, setSelectedEntry])
 
   return (
     <View style={styles.container}>
@@ -128,14 +129,14 @@ export function CalendarScreen() {
                   <Ionicons
                     name={isPlaying ? 'stop-circle-outline' : 'play-circle-outline'}
                     size={28}
-                    color="#007AFF"
+                    color="#333"
                   />
                 </Pressable>
               ) : (
                 <Ionicons name="mic-off-outline" size={24} color="#999" />
               )}
               <Pressable onPress={handleCloseEntry}>
-                <Text style={styles.closeText}>Close</Text>
+                <Ionicons name="close" size={24} color="#333" />
               </Pressable>
             </View>
           </View>
@@ -258,10 +259,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#666',
-  },
-  closeText: {
-    fontSize: 14,
-    color: '#007AFF',
   },
   selectedEntryText: {
     fontSize: 16,
