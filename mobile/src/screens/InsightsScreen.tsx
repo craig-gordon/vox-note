@@ -108,14 +108,14 @@ export function InsightsScreen() {
     )
   }
 
-  // Empty result (no entries in past week)
+  // Empty result (no entries in past month)
   if (insight.result.analyzedEntryCount === 0) {
     return (
       <View style={styles.centerContainer}>
         <Ionicons name="journal-outline" size={60} color="#ccc" />
         <Text style={styles.emptyTitle}>No Recent Entries</Text>
         <Text style={styles.emptySubtitle}>
-          Record some journal entries to see insights about your week.
+          Record a journal entry to start generating insights.
         </Text>
       </View>
     )
@@ -126,7 +126,7 @@ export function InsightsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Weekly Insights</Text>
+        <Text style={styles.headerTitle}>Monthly Insights</Text>
         <View style={styles.headerRight}>
           {insightsGenerating && (
             <Text style={styles.updatingText}>Generating...</Text>
@@ -138,7 +138,7 @@ export function InsightsScreen() {
       </View>
 
       <Text style={styles.subheader}>
-        Based on {insight.result.analyzedEntryCount} {insight.result.analyzedEntryCount === 1 ? 'entry' : 'entries'} from the past week
+        Based on {insight.result.analyzedEntryCount} {insight.result.analyzedEntryCount === 1 ? 'entry' : 'entries'} from the past month
       </Text>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>

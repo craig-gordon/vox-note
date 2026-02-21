@@ -100,6 +100,21 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     setHasRecordedAudio(false)
   }, [])
 
+  const persistAudio = useCallback(async (entryKey: string) => {
+    const uri = lastRecordingUriRef.current
+    if (!uri) return
+
+    const audioDir = `${FileSystem.documentDirectory}audio/`
+    const dirInfo = await FileSystem.getInfoAsync(audioDir)
+    if (!dirInfo.exists) {
+      await FileSystem.makeDirectoryAsync(audioDir, { intermediates: true })
+    }
+
+    const safeFilename = entryKey.replace(/:/g, '-')
+    await FileSystem.copyAsync({ from: uri, to: `${audioDir}${safeFilename}.m4a` })
+    console.log('Audio persisted for entry:', entryKey)
+  }, [])
+
   const playRecording = useCallback(async () => {
     const uri = lastRecordingUriRef.current
     if (!uri) {
@@ -131,5 +146,6 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     stopRecording,
     clearTranscript,
     playRecording,
+    persistAudio,
   }
 }

@@ -32,7 +32,7 @@ INSIGHT TYPES (use the most appropriate):
 CONTEXT-BASED APPROACH:
 - With 1 entry: Don't force patterns. Focus on 1-2 reflection questions and maybe 1 suggestion. Acknowledge limited data.
 - With 2-3 entries: Look for emerging patterns or connections between entries.
-- With 4+ entries: Full pattern analysis across the week.
+- With 4+ entries: Full pattern analysis across the month.
 
 FORMAT:
 Return a JSON object with an "insights" array. Each insight has:
@@ -63,12 +63,12 @@ export async function generateInsights(
 
   const formattedEntries = formatEntriesForPrompt(entries)
   const entryCountContext = entries.length === 1
-    ? 'Note: There is only 1 entry this week. Focus on reflection questions rather than forcing patterns.'
+    ? 'Note: There is only 1 entry this month. Focus on reflection questions rather than forcing patterns.'
     : `Note: There are ${entries.length} entries to analyze.`
 
   const messages: ChatMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
-    { role: 'user', content: `${entryCountContext}\n\nHere are my journal entries from the past week:\n\n${formattedEntries}` },
+    { role: 'user', content: `${entryCountContext}\n\nHere are my journal entries from the past month:\n\n${formattedEntries}` },
   ]
 
   const result = await chatCompletion(messages, { apiKey })

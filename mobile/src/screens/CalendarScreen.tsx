@@ -2,8 +2,10 @@ import { useCallback, useEffect } from 'react'
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import type { DateData } from 'react-native-calendars'
+import { Ionicons } from '@expo/vector-icons'
 import { formatEntryKeyReadable, formatDateForDisplay, formatEntryLabel } from '@journaling-app/shared'
 import { useJournal } from '../context/JournalContext'
+import { useAudioPlayback } from '../hooks/useAudioPlayback'
 
 export function CalendarScreen() {
   const {
@@ -18,6 +20,8 @@ export function CalendarScreen() {
     deleteAllEntries,
     loadEntry,
   } = useJournal()
+
+  const { hasAudio, isPlaying, play, stop } = useAudioPlayback(selectedEntry?.key ?? null)
 
   const handleDayPress = useCallback((day: DateData) => {
     setSelectedEntry(null)
@@ -118,9 +122,22 @@ export function CalendarScreen() {
         <View style={styles.selectedEntryContainer}>
           <View style={styles.selectedEntryHeader}>
             <Text style={styles.selectedEntryLabel}>{formatEntryLabel(selectedEntry.key, entriesForSelectedDate.length > 1)}</Text>
-            <Pressable onPress={handleCloseEntry}>
-              <Text style={styles.closeText}>Close</Text>
-            </Pressable>
+            <View style={styles.headerActions}>
+              {hasAudio ? (
+                <Pressable onPress={isPlaying ? stop : play} style={styles.playButton}>
+                  <Ionicons
+                    name={isPlaying ? 'stop-circle-outline' : 'play-circle-outline'}
+                    size={28}
+                    color="#007AFF"
+                  />
+                </Pressable>
+              ) : (
+                <Ionicons name="mic-off-outline" size={24} color="#999" />
+              )}
+              <Pressable onPress={handleCloseEntry}>
+                <Text style={styles.closeText}>Close</Text>
+              </Pressable>
+            </View>
           </View>
           <ScrollView
             style={styles.selectedEntryScroll}
@@ -228,6 +245,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
     paddingHorizontal: 15,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  playButton: {
+    padding: 2,
   },
   selectedEntryLabel: {
     fontSize: 14,

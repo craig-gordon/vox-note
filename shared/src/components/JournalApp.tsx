@@ -21,6 +21,7 @@ export function JournalApp() {
     stopRecording,
     clearTranscript,
     playRecording,
+    persistAudio,
   } = useSpeechToText()
 
   const {
@@ -47,14 +48,16 @@ export function JournalApp() {
   }
 
   const handleSave = async () => {
-    await saveEntry(transcript)
+    const key = await saveEntry(transcript)
+    await persistAudio(key)
     clearTranscript()
     setSelectedEntry(null)
   }
 
   const handleSaveToDate = async () => {
     if (mostRecentEmptyDate) {
-      await saveEntry(transcript, mostRecentEmptyDate)
+      const key = await saveEntry(transcript, mostRecentEmptyDate)
+      await persistAudio(key)
       clearTranscript()
       setSelectedEntry(null)
     }

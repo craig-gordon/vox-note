@@ -101,6 +101,8 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     setHasRecordedAudio(false)
   }, [])
 
+  const persistAudio = useCallback(async (_entryKey: string) => {}, [])
+
   const playRecording = useCallback(() => {
     const audioBlob = lastRecordingBlobRef.current
     if (!audioBlob) {
@@ -131,5 +133,6 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     stopRecording,
     clearTranscript,
     playRecording,
+    persistAudio,
   }
 }

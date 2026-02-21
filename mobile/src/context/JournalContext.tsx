@@ -97,10 +97,11 @@ export function JournalProvider({ children }: JournalProviderProps) {
   // Wrap saveEntry to regenerate insights after save
   const saveEntryAndRegenerateInsights = useCallback(async (content: string, customDate?: Date) => {
     const key = await entryStorage.saveEntry(content, customDate)
+    await speechToText.persistAudio(key)
     // Regenerate insights in background (non-blocking)
     insightsHook.generateNewInsight()
     return key
-  }, [entryStorage, insightsHook])
+  }, [entryStorage, speechToText, insightsHook])
 
   const value: JournalContextValue = {
     // Speech to text

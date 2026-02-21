@@ -52,7 +52,7 @@ export function useInsights(apiKey: string | undefined): UseInsightsReturn {
     try {
       const endDate = new Date()
       const startDate = new Date()
-      startDate.setDate(startDate.getDate() - 7)
+      startDate.setDate(startDate.getDate() - 30)
 
       const entries = await getEntriesForDateRange(startDate, endDate)
       const result = await generateInsights(entries, apiKey)

@@ -10,4 +10,5 @@ export interface UseSpeechToTextReturn {
   stopRecording: () => void
   clearTranscript: () => void
   playRecording: () => void
+  persistAudio: (entryKey: string) => Promise<void>
 }
