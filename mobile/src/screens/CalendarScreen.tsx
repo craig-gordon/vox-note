@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react'
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native'
 import { Calendar } from 'react-native-calendars'
 import type { DateData } from 'react-native-calendars'
 import { Ionicons } from '@expo/vector-icons'
@@ -18,6 +18,7 @@ export function CalendarScreen() {
     setSelectedEntry,
     handleSelectEntry,
     deleteAllEntries,
+    deleteEntry,
     loadEntry,
   } = useJournal()
 
@@ -30,6 +31,25 @@ export function CalendarScreen() {
 
   const handleCloseEntry = () => {
     setSelectedEntry(null)
+  }
+
+  const handleDeleteEntry = () => {
+    if (!selectedEntry) return
+    Alert.alert(
+      'Delete Entry',
+      'Are you sure you want to delete this entry?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteEntry(selectedEntry.key)
+            setSelectedEntry(null)
+          },
+        },
+      ],
+    )
   }
 
   const handleClearAllEntries = async () => {
@@ -135,6 +155,9 @@ export function CalendarScreen() {
               ) : (
                 <Ionicons name="mic-off-outline" size={24} color="#999" />
               )}
+              <Pressable onPress={handleDeleteEntry}>
+                <Ionicons name="trash-outline" size={20} color="#333" />
+              </Pressable>
               <Pressable onPress={handleCloseEntry}>
                 <Ionicons name="close" size={24} color="#333" />
               </Pressable>
