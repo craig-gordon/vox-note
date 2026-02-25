@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { transcribeWithWhisperApi } from '../utils/whisperApi'
+import { saveAudioBlob } from '../utils/audioStorage.web'
 import type { RecordingState, UseSpeechToTextReturn } from './useSpeechToText.types'
 
 const VITE_OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY as string | undefined
@@ -8,11 +9,13 @@ export function useSpeechToText(): UseSpeechToTextReturn {
   const [recordingState, setRecordingState] = useState<RecordingState>('idle')
   const [transcript, setTranscript] = useState('')
   const [hasRecordedAudio, setHasRecordedAudio] = useState(false)
+  const [recordingDuration, setRecordingDuration] = useState(0)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const streamRef = useRef<MediaStream | null>(null)
   const lastRecordingBlobRef = useRef<Blob | null>(null)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const startRecording = useCallback(async () => {
     if (recordingState !== 'idle') return
@@ -80,6 +83,8 @@ export function useSpeechToText(): UseSpeechToTextReturn {
 
       mediaRecorder.start()
       setRecordingState('recording')
+      setRecordingDuration(0)
+      timerRef.current = setInterval(() => setRecordingDuration(d => d + 1), 1000)
       console.log('Recording started')
     } catch (error) {
       console.error('Failed to start recording:', error)
@@ -89,6 +94,11 @@ export function useSpeechToText(): UseSpeechToTextReturn {
 
   const stopRecording = useCallback(() => {
     if (recordingState !== 'recording') return
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
 
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       mediaRecorderRef.current.stop()
@@ -101,7 +111,12 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     setHasRecordedAudio(false)
   }, [])
 
-  const persistAudio = useCallback(async (_entryKey: string) => {}, [])
+  const persistAudio = useCallback(async (entryKey: string) => {
+    const blob = lastRecordingBlobRef.current
+    if (!blob) return
+    await saveAudioBlob(entryKey, blob)
+    console.log('Audio persisted for entry:', entryKey)
+  }, [])
 
   const playRecording = useCallback(() => {
     const audioBlob = lastRecordingBlobRef.current
@@ -129,7 +144,7 @@ export function useSpeechToText(): UseSpeechToTextReturn {
     transcript,
     recordingState,
     hasRecordedAudio,
-    recordingDuration: 0,
+    recordingDuration,
     startRecording,
     stopRecording,
     clearTranscript,
